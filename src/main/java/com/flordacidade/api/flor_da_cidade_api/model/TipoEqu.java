@@ -2,10 +2,6 @@ package com.flordacidade.api.flor_da_cidade_api.model;
 
 import jakarta.persistence.*;
 
-
-
-
-
 @Entity
 @Table(name = "tipo_equ")
 public class TipoEqu {
@@ -14,8 +10,9 @@ public class TipoEqu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer seqTipoEqu; // Integer para corresponder ao auto-increment
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "descr_tipo_equ", nullable = false, length = 60)
-    private String descrTipoEqu;
+    private TipoEquipamento descrTipoEqu; // Deve ser do tipo ENUM
 
     // Getters e Setters
     public Integer getSeqTipoEqu() {
@@ -26,11 +23,12 @@ public class TipoEqu {
         this.seqTipoEqu = seqTipoEqu;
     }
 
-    public String getDescrTipoEqu() {
+    public TipoEquipamento getDescrTipoEqu() {
         return descrTipoEqu;
     }
 
-    public void setDescrTipoEqu(String descrTipoEqu) {
+    public void setDescrTipoEqu(TipoEquipamento descrTipoEqu) {
         this.descrTipoEqu = descrTipoEqu;
     }
+
 }

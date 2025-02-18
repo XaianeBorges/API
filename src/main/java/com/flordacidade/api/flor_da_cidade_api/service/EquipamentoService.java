@@ -37,7 +37,8 @@ public class EquipamentoService {
             equipamento.setObserv(equipamentoAtualizado.getObserv());
             equipamento.setQtdBancas(equipamentoAtualizado.getQtdBancas());
             equipamento.setDatVal(equipamentoAtualizado.getDatVal());
-            equipamento.setHorario(equipamentoAtualizado.getHorario());
+            equipamento.setHorarioAbertura(equipamentoAtualizado.getHorarioAbertura());
+            equipamento.setHorarioFechamento(equipamentoAtualizado.getHorarioFechamento());
             equipamento.setQtdVisitas(equipamentoAtualizado.getQtdVisitas());
             equipamento.setTipoEqu(equipamentoAtualizado.getTipoEqu());
             equipamento.setResponsavel(equipamentoAtualizado.getResponsavel());

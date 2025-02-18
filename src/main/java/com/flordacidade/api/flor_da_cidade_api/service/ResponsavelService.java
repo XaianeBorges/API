@@ -27,26 +27,28 @@ public class ResponsavelService {
         if (!CPFValidator.isValidCPF(responsavel.getCpf())) {
             throw new IllegalArgumentException("CPF inválido");
         }
+
+        if (!responsavel.getGenero().matches("MASCULINO|FEMININO|OUTRO")) {
+            throw new IllegalArgumentException("Gênero inválido. Use 'MASCULINO', 'FEMININO' ou 'OUTRO'.");
+        }
+
         return responsavelRepository.save(responsavel);
     }
 
     public Responsavel atualizarResponsavel(Integer id, Responsavel responsavelAtualizado) {
-        Optional<Responsavel> responsavelExistente = responsavelRepository.findById(id);
-        if (responsavelExistente.isPresent()) {
-            Responsavel responsavel = responsavelExistente.get();
-            responsavel.setLogradouro(responsavelAtualizado.getLogradouro());
-            responsavel.setNumero(responsavelAtualizado.getNumero());
-            responsavel.setBairro(responsavelAtualizado.getBairro());
-            responsavel.setDocumento(responsavelAtualizado.getDocumento());
-            responsavel.setCpf(responsavelAtualizado.getCpf());
-            responsavel.setNome(responsavelAtualizado.getNome());
-            responsavel.setGenero(responsavelAtualizado.getGenero());
-            responsavel.setTelefone(responsavelAtualizado.getTelefone());
-            responsavel.setEmail(responsavelAtualizado.getEmail());
-            return salvarResponsavel(responsavel);
-        } else {
-            throw new RuntimeException("Responsável não encontrado com o ID: " + id);
-        }
+        return responsavelRepository.findById(id)
+                .map(responsavel -> {
+                    responsavel.setLogradouro(responsavelAtualizado.getLogradouro());
+                    responsavel.setNumero(responsavelAtualizado.getNumero());
+                    responsavel.setBairro(responsavelAtualizado.getBairro());
+                    responsavel.setDocumento(responsavelAtualizado.getDocumento());
+                    responsavel.setCpf(responsavelAtualizado.getCpf());
+                    responsavel.setNome(responsavelAtualizado.getNome());
+                    responsavel.setGenero(responsavelAtualizado.getGenero());
+                    responsavel.setTelefone(responsavelAtualizado.getTelefone());
+                    responsavel.setEmail(responsavelAtualizado.getEmail());
+                    return responsavelRepository.save(responsavel);
+                }).orElseThrow(() -> new RuntimeException("Responsável não encontrado com o ID: " + id));
     }
 
     public void deletarResponsavel(Integer id) {

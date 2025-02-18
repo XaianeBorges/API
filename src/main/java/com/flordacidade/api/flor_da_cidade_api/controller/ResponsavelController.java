@@ -3,6 +3,7 @@ package com.flordacidade.api.flor_da_cidade_api.controller;
 import com.flordacidade.api.flor_da_cidade_api.model.Responsavel;
 import com.flordacidade.api.flor_da_cidade_api.service.ResponsavelService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,22 +22,25 @@ public class ResponsavelController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Responsavel> buscarPorId(@PathVariable Integer id) {
-        return responsavelService.buscarPorId(id);
+    public ResponseEntity<Responsavel> buscarPorId(@PathVariable Integer id) {
+        return responsavelService.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Responsavel salvarResponsavel(@RequestBody Responsavel responsavel) {
-        return responsavelService.salvarResponsavel(responsavel);
+    public ResponseEntity<Responsavel> salvarResponsavel(@RequestBody Responsavel responsavel) {
+        return ResponseEntity.ok(responsavelService.salvarResponsavel(responsavel));
     }
 
     @PutMapping("/{id}")
-    public Responsavel atualizarResponsavel(@PathVariable Integer id, @RequestBody Responsavel responsavelAtualizado) {
-        return responsavelService.atualizarResponsavel(id, responsavelAtualizado);
+    public ResponseEntity<Responsavel> atualizarResponsavel(@PathVariable Integer id, @RequestBody Responsavel responsavelAtualizado) {
+        return ResponseEntity.ok(responsavelService.atualizarResponsavel(id, responsavelAtualizado));
     }
 
     @DeleteMapping("/{id}")
-    public void deletarResponsavel(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletarResponsavel(@PathVariable Integer id) {
         responsavelService.deletarResponsavel(id);
+        return ResponseEntity.noContent().build();
     }
 }

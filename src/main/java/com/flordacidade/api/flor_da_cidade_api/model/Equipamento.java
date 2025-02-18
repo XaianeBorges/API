@@ -1,7 +1,5 @@
 package com.flordacidade.api.flor_da_cidade_api.model;
 
-import com.flordacidade.api.flor_da_cidade_api.model.Responsavel;
-import com.flordacidade.api.flor_da_cidade_api.model.TipoEqu;
 import jakarta.persistence.*;
 import java.sql.Date;
 import java.sql.Time;
@@ -23,7 +21,8 @@ public class Equipamento {
     private String observ;
     private Integer qtdBancas;
     private Date datVal;
-    private Time horario;
+    private Time horarioAbertura;
+    private Time horarioFechamento;
     private int qtdVisitas;
 
     @ManyToOne
@@ -72,6 +71,9 @@ public class Equipamento {
     }
 
     public void setValidacao(String validacao) {
+        if (!validacao.equals("S") && !validacao.equals("N")) {
+            throw new IllegalArgumentException("Validacao deve ser 'S' ou 'N'");
+        }
         this.validacao = validacao;
     }
 
@@ -104,6 +106,9 @@ public class Equipamento {
     }
 
     public void setQtdBancas(Integer qtdBancas) {
+        if (qtdBancas < 0) {
+            throw new IllegalArgumentException("A quantidade de bancas não pode ser negativa.");
+        }
         this.qtdBancas = qtdBancas;
     }
 
@@ -115,12 +120,20 @@ public class Equipamento {
         this.datVal = datVal;
     }
 
-    public Time getHorario() {
-        return horario;
+    public Time getHorarioAbertura() {
+        return horarioAbertura;
     }
 
-    public void setHorario(Time horario) {
-        this.horario = horario;
+    public void setHorarioAbertura(Time horarioAbertura) {
+        this.horarioAbertura = horarioAbertura;
+    }
+
+    public Time getHorarioFechamento() {
+        return horarioFechamento;
+    }
+
+    public void setHorarioFechamento(Time horarioFechamento) {
+        this.horarioFechamento = horarioFechamento;
     }
 
     public int getQtdVisitas() {

@@ -1,6 +1,7 @@
 package com.flordacidade.api.flor_da_cidade_api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "responsavel")
@@ -11,30 +12,39 @@ public class Responsavel {
     private Integer seqResp;
 
     @Column(nullable = false, length = 60)
+    @NotBlank(message = "Logradouro é obrigatório")
     private String logradouro;
 
     @Column(nullable = false, length = 10)
+    @NotBlank(message = "Número é obrigatório")
     private String numero;
 
     @Column(nullable = false, length = 30)
+    @NotBlank(message = "Bairro é obrigatório")
     private String bairro;
 
     @Column(nullable = false, unique = true, length = 10)
+    @NotBlank(message = "Documento é obrigatório")
     private String documento;
 
     @Column(nullable = false, unique = true, length = 11)
+    @NotBlank(message = "CPF é obrigatório")
     private String cpf;
 
     @Column(nullable = false, length = 30)
+    @NotBlank(message = "Nome é obrigatório")
     private String nome;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
+    @Pattern(regexp = "MASCULINO|FEMININO|OUTRO", message = "Gênero deve ser 'MASCULINO', 'FEMININO' ou 'OUTRO'")
     private String genero;
 
-    @Column(length = 10)
+    @Column(nullable = false, length = 11)
+    @Pattern(regexp = "\\d{11}", message = "Telefone deve conter 11 dígitos")
     private String telefone;
 
     @Column(length = 30, unique = true)
+    @Email(message = "Email inválido")
     private String email;
 
     // Getters e Setters
@@ -99,6 +109,9 @@ public class Responsavel {
     }
 
     public void setGenero(String genero) {
+        if (!genero.matches("MASCULINO|FEMININO|OUTRO")) {
+            throw new IllegalArgumentException("Gênero inválido. Use 'MASCULINO', 'FEMININO' ou 'OUTRO'.");
+        }
         this.genero = genero;
     }
 
