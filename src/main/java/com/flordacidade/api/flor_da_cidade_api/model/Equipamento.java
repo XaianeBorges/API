@@ -106,11 +106,12 @@ public class Equipamento {
     }
 
     public void setQtdBancas(Integer qtdBancas) {
-        if (qtdBancas < 0) {
+        if (qtdBancas != null && qtdBancas < 0) {
             throw new IllegalArgumentException("A quantidade de bancas não pode ser negativa.");
         }
         this.qtdBancas = qtdBancas;
     }
+
 
     public Date getDatVal() {
         return datVal;
