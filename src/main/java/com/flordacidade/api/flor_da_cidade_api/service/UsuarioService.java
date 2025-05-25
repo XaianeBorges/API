@@ -65,7 +65,6 @@ public class UsuarioService {
         u.setPessoa(pessoa);
         u.setSenha(dto.getSenha());
         u.setAtivo(dto.getAtivo());
-        u.setIsTecnico(dto.getIsTecnico());
         u.setMatricula(dto.getMatricula());
         return u;
     }
@@ -79,7 +78,6 @@ public class UsuarioService {
         dto.setDataCriacao(u.getDataCriacao());
         dto.setDataAtualizacao(u.getDataAtualizacao());
         dto.setAtivo(u.getAtivo());
-        dto.setIsTecnico(u.getIsTecnico());
         dto.setMatricula(u.getMatricula());
         return dto;
     }

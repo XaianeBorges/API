@@ -34,9 +34,6 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean ativo = true;
 
-    @Column(name = "is_tecnico", nullable = false)
-    private Boolean isTecnico = false;
-
     @Column(length = 255)
     private String matricula;
 
@@ -56,9 +53,6 @@ public class Usuario {
 
     public Boolean getAtivo() { return ativo; }
     public void setAtivo(Boolean ativo) { this.ativo = ativo; }
-
-    public Boolean getIsTecnico() { return isTecnico; }
-    public void setIsTecnico(Boolean isTecnico) { this.isTecnico = isTecnico; }
 
     public String getMatricula() { return matricula; }
     public void setMatricula(String matricula) { this.matricula = matricula; }

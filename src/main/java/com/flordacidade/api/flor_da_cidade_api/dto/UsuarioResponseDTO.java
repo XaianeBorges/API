@@ -10,7 +10,6 @@ public class UsuarioResponseDTO {
     private LocalDateTime dataCriacao;
     private LocalDateTime dataAtualizacao;
     private Boolean ativo;
-    private Boolean isTecnico;
     private String matricula;
 
     // Getters e Setters
@@ -32,9 +31,6 @@ public class UsuarioResponseDTO {
 
     public Boolean getAtivo() { return ativo; }
     public void setAtivo(Boolean ativo) { this.ativo = ativo; }
-
-    public Boolean getIsTecnico() { return isTecnico; }
-    public void setIsTecnico(Boolean isTecnico) { this.isTecnico = isTecnico; }
 
     public String getMatricula() { return matricula; }
     public void setMatricula(String matricula) { this.matricula = matricula; }

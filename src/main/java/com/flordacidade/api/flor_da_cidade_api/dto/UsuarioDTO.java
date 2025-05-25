@@ -12,7 +12,6 @@ public class UsuarioDTO {
     private String senha;
 
     private Boolean ativo = true;
-    private Boolean isTecnico = false;
     private String matricula;
 
     // getters & setters
@@ -25,9 +24,6 @@ public class UsuarioDTO {
 
     public Boolean getAtivo() { return ativo; }
     public void setAtivo(Boolean ativo) { this.ativo = ativo; }
-
-    public Boolean getIsTecnico() { return isTecnico; }
-    public void setIsTecnico(Boolean isTecnico) { this.isTecnico = isTecnico; }
 
     public String getMatricula() { return matricula; }
     public void setMatricula(String matricula) { this.matricula = matricula; }
