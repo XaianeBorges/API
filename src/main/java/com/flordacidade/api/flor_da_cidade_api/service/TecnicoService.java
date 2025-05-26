@@ -1,3 +1,4 @@
+// src/main/java/com/flordacidade/api/flor_da_cidade_api/service/TecnicoService.java
 package com.flordacidade.api.flor_da_cidade_api.service;
 
 import com.flordacidade.api.flor_da_cidade_api.dto.TecnicoDTO;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TecnicoService {
@@ -49,17 +51,16 @@ public class TecnicoService {
         repo.deleteById(id);
     }
 
-    // Converte DTO→Entity
     private Tecnico dtoToEntity(TecnicoDTO dto) {
         Tecnico t = new Tecnico();
         t.setStatus(dto.getStatus());
         t.setMatricula(dto.getMatricula());
         t.setSenha(dto.getSenha());
         t.setRegiao(dto.getRegiao());
+        t.setNome(dto.getNome());  // ← Mapeamento do nome
         return t;
     }
 
-    // Converte Entity→ResponseDTO
     public TecnicoResponseDTO toResponseDTO(Tecnico t) {
         TecnicoResponseDTO dto = new TecnicoResponseDTO();
         dto.setId(t.getId());
@@ -68,6 +69,7 @@ public class TecnicoService {
         dto.setDataCriacao(t.getDataCriacao());
         dto.setDataAtualizacao(t.getDataAtualizacao());
         dto.setRegiao(t.getRegiao());
+        dto.setNome(t.getNome());  // ← Inclusão do nome na resposta
         return dto;
     }
 }

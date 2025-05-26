@@ -1,3 +1,4 @@
+// src/main/java/com/flordacidade/api/flor_da_cidade_api/controller/TecnicoController.java
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.dto.TecnicoDTO;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tecnicos")
@@ -22,10 +24,9 @@ public class TecnicoController {
 
     @GetMapping
     public List<TecnicoResponseDTO> listAll() {
-        return service.getAll()
-                .stream()
+        return service.getAll().stream()
                 .map(service::toResponseDTO)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -39,7 +40,6 @@ public class TecnicoController {
     @PostMapping
     public ResponseEntity<TecnicoResponseDTO> create(
             @RequestBody @Valid TecnicoDTO dto) {
-
         Tecnico t = service.createFromDTO(dto);
         return ResponseEntity.ok(service.toResponseDTO(t));
     }
@@ -48,7 +48,6 @@ public class TecnicoController {
     public ResponseEntity<TecnicoResponseDTO> update(
             @PathVariable Integer id,
             @RequestBody @Valid TecnicoDTO dto) {
-
         Tecnico t = service.updateFromDTO(id, dto);
         return ResponseEntity.ok(service.toResponseDTO(t));
     }

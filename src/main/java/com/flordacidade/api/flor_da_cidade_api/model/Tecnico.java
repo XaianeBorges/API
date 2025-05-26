@@ -1,3 +1,4 @@
+// src/main/java/com/flordacidade/api/flor_da_cidade_api/model/Tecnico.java
 package com.flordacidade.api.flor_da_cidade_api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -38,25 +39,66 @@ public class Tecnico {
     @Column(length = 255)
     private String regiao;
 
-    // --- getters & setters ---
+    @Column(nullable = false, length = 45)
+    private String nome;  // ← Novo campo
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    // getters & setters
 
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
+    public Integer getId() {
+        return id;
+    }
 
-    public String getMatricula() { return matricula; }
-    public void setMatricula(String matricula) { this.matricula = matricula; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public LocalDateTime getDataCriacao() { return dataCriacao; }
-    public LocalDateTime getDataAtualizacao() { return dataAtualizacao; }
+    public Status getStatus() {
+        return status;
+    }
 
-    public String getSenha() { return senha; }
-    public void setSenha(String senha) { this.senha = senha; }
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
-    public String getRegiao() { return regiao; }
-    public void setRegiao(String regiao) { this.regiao = regiao; }
+    public String getMatricula() {
+        return matricula;
+    }
+
+    public void setMatricula(String matricula) {
+        this.matricula = matricula;
+    }
+
+    public LocalDateTime getDataCriacao() {
+        return dataCriacao;
+    }
+
+    public LocalDateTime getDataAtualizacao() {
+        return dataAtualizacao;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
+
+    public String getRegiao() {
+        return regiao;
+    }
+
+    public void setRegiao(String regiao) {
+        this.regiao = regiao;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
     public enum Status {
         ATIVO, INATIVO
