@@ -1,52 +1,57 @@
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
-import com.flordacidade.api.flor_da_cidade_api.dto.PessoaDTO;
-import com.flordacidade.api.flor_da_cidade_api.model.Pessoa;
+import com.flordacidade.api.flor_da_cidade_api.model.PessoaModel;
 import com.flordacidade.api.flor_da_cidade_api.service.PessoaService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/pessoas")
+@RequestMapping("/api/pessoas")   // ← coloque o “/” na frente
 public class PessoaController {
-    private final PessoaService service;
 
-    @Autowired
-    public PessoaController(PessoaService service) {
-        this.service = service;
+    private final PessoaService pessoaService;
+
+    public PessoaController(PessoaService pessoaService) {
+        this.pessoaService = pessoaService;
     }
 
     @GetMapping
-    public List<Pessoa> listAll() {
-        return service.getAll();
+    public ResponseEntity<List<PessoaModel>> listarTodos() {
+        return ResponseEntity.ok(pessoaService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Pessoa> getById(@PathVariable Integer id) {
-        return service.getById(id)
+    public ResponseEntity<PessoaModel> buscarPorId(@PathVariable Integer id) {
+        return pessoaService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Pessoa> create(@RequestBody @Valid PessoaDTO dto) {
-        Pessoa created = service.createFromDTO(dto);
-        return ResponseEntity.ok(created);
+    public ResponseEntity<?> criar(@RequestBody PessoaModel pessoa) {
+        try {
+            PessoaModel novaPessoa = pessoaService.criar(pessoa);
+            return ResponseEntity.status(HttpStatus.CREATED).body(novaPessoa);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Pessoa> update(@PathVariable Integer id, @RequestBody @Valid PessoaDTO dto) {
-        Pessoa updated = service.updateFromDTO(id, dto);
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<?> atualizar(@PathVariable Integer id, @RequestBody PessoaModel pessoa) {
+        try {
+            return ResponseEntity.ok(pessoaService.atualizar(id, pessoa));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void excluir(@PathVariable Integer id) {
+        pessoaService.excluir(id);
     }
 }

@@ -1,16 +1,12 @@
-// src/main/java/com/flordacidade/api/flor_da_cidade_api/controller/TecnicoController.java
+// src/main/java/com/flordacidade/api/flordacidade/api/flor_da_cidade_api/controller/TecnicoController.java
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
-import com.flordacidade.api.flor_da_cidade_api.dto.TecnicoDTO;
-import com.flordacidade.api.flor_da_cidade_api.dto.TecnicoResponseDTO;
-import com.flordacidade.api.flor_da_cidade_api.model.Tecnico;
+import com.flordacidade.api.flor_da_cidade_api.model.TecnicoModel;
 import com.flordacidade.api.flor_da_cidade_api.service.TecnicoService;
-import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tecnicos")
@@ -18,38 +14,33 @@ public class TecnicoController {
 
     private final TecnicoService service;
 
+    @Autowired
     public TecnicoController(TecnicoService service) {
         this.service = service;
     }
 
     @GetMapping
-    public List<TecnicoResponseDTO> listAll() {
-        return service.getAll().stream()
-                .map(service::toResponseDTO)
-                .collect(Collectors.toList());
+    public ResponseEntity<List<TecnicoModel>> getAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TecnicoResponseDTO> getById(@PathVariable Integer id) {
+    public ResponseEntity<TecnicoModel> getById(@PathVariable Integer id) {
         return service.getById(id)
-                .map(service::toResponseDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<TecnicoResponseDTO> create(
-            @RequestBody @Valid TecnicoDTO dto) {
-        Tecnico t = service.createFromDTO(dto);
-        return ResponseEntity.ok(service.toResponseDTO(t));
+    public ResponseEntity<TecnicoModel> create(@RequestBody TecnicoModel tecnico) {
+        return ResponseEntity.ok(service.create(tecnico));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TecnicoResponseDTO> update(
-            @PathVariable Integer id,
-            @RequestBody @Valid TecnicoDTO dto) {
-        Tecnico t = service.updateFromDTO(id, dto);
-        return ResponseEntity.ok(service.toResponseDTO(t));
+    public ResponseEntity<TecnicoModel> update(@PathVariable Integer id, @RequestBody TecnicoModel tecnico) {
+        return service.update(id, tecnico)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

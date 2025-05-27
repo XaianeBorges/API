@@ -1,0 +1,51 @@
+// src/main/java/com/flordacidade/api/flor_da_cidade_api/model/Usuario.java
+package com.flordacidade.api.flor_da_cidade_api.model;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "usuario")
+@Getter
+@Setter
+@NoArgsConstructor
+public class UsuarioModel {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_usuario")
+    private Integer id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+    @JoinColumn(name = "id_pessoa", nullable = false)
+    @NotNull
+    private PessoaModel pessoa;
+
+    @Column(name = "senha", nullable = false)
+    @NotNull
+    @Size(min = 8)
+    private String senha;
+
+    @CreationTimestamp
+    @Column(name = "data_criacao", updatable = false)
+    private LocalDateTime criadoEm;
+
+    @UpdateTimestamp
+    @Column(name = "data_atualizacao")
+    private LocalDateTime atualizadoEm;
+
+    @Column(name = "ativo", nullable = false)
+    private Boolean ativo = true;
+
+    @Column(name = "matricula")
+    private String matricula;
+}

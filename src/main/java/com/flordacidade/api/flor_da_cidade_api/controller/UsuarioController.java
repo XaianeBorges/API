@@ -1,70 +1,55 @@
+// src/main/java/com/flordacidade/api/flor_da_cidade_api/controller/UsuarioController.java
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
-import com.flordacidade.api.flor_da_cidade_api.dto.UsuarioDTO;
-import com.flordacidade.api.flor_da_cidade_api.dto.UsuarioResponseDTO;
-import com.flordacidade.api.flor_da_cidade_api.model.Usuario;
+import com.flordacidade.api.flor_da_cidade_api.model.UsuarioModel;
 import com.flordacidade.api.flor_da_cidade_api.service.UsuarioService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@Validated
+@RequiredArgsConstructor
 public class UsuarioController {
 
     private final UsuarioService service;
 
-    @Autowired
-    public UsuarioController(UsuarioService service) {
-        this.service = service;
-    }
-
     @GetMapping
-    public List<UsuarioResponseDTO> listAll() {
-        return service.getAll()
-                .stream()
-                .map(this::toResponseDTO)
-                .toList();
+    public ResponseEntity<List<UsuarioModel>> getAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDTO> getById(@PathVariable Integer id) {
+    public ResponseEntity<UsuarioModel> getById(@PathVariable Integer id) {
         return service.getById(id)
-                .map(this::toResponseDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> create(
-            @RequestBody @Valid UsuarioDTO dto) {
-
-        Usuario u = service.createFromDTO(dto);
-        return ResponseEntity
-                .ok(toResponseDTO(u));
+    public ResponseEntity<UsuarioModel> create(@Valid @RequestBody UsuarioModel usuario) {
+        UsuarioModel created = service.create(usuario);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDTO> update(
+    public ResponseEntity<UsuarioModel> update(
             @PathVariable Integer id,
-            @RequestBody @Valid UsuarioDTO dto) {
-
-        Usuario u = service.updateFromDTO(id, dto);
-        return ResponseEntity
-                .ok(toResponseDTO(u));
+            @Valid @RequestBody UsuarioModel usuario) {
+        return service.update(id, usuario)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Integer id) {
         service.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
-
-    private UsuarioResponseDTO toResponseDTO(Usuario u) {
-        return service.toResponseDTO(u);
     }
 }

@@ -13,26 +13,25 @@ public enum Escolaridade {
     ENSINO_SUPERIOR_COMPLETO("Ensino superior completo"),
     POS_GRADUACAO("Pós graduação");
 
-    private final String label;
+    private final String valor;
 
-    Escolaridade(String label) {
-        this.label = label;
+    Escolaridade(String valor) {
+        this.valor = valor;
     }
 
     @JsonValue
-    public String getLabel() {
-        return label;
+    public String getValor() {
+        return valor;
     }
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static Escolaridade fromLabel(String label) {
-        if (label == null) return null;
-        String trimmed = label.trim();
-        for (Escolaridade e : values()) {
-            if (e.label.equalsIgnoreCase(trimmed) || e.name().equalsIgnoreCase(trimmed)) {
+    @JsonCreator
+    public static Escolaridade fromString(String text) {
+        if (text == null) return null;
+        for (Escolaridade e : Escolaridade.values()) {
+            if (e.valor.equalsIgnoreCase(text.trim())) {
                 return e;
             }
         }
-        throw new IllegalArgumentException("Escolaridade inválida: " + label);
+        throw new IllegalArgumentException("Escolaridade inválida: " + text);
     }
 }
