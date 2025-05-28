@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PessoaRepository extends JpaRepository<PessoaModel, Integer> {
+
     boolean existsByCpf(String cpf);
     boolean existsByEmail(String email);
     boolean existsByTelefone(String telefone);

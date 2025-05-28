@@ -1,3 +1,4 @@
+// src/main/java/com/flordacidade/api/flor_da_cidade_api/controller/PessoaController.java
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.model.PessoaModel;
@@ -9,41 +10,42 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/pessoas")   // ← coloque o “/” na frente
+@RequestMapping("/api/pessoas")
 public class PessoaController {
 
-    private final PessoaService pessoaService;
+    private final PessoaService service;
 
-    public PessoaController(PessoaService pessoaService) {
-        this.pessoaService = pessoaService;
+    public PessoaController(PessoaService service) {
+        this.service = service;
     }
 
     @GetMapping
     public ResponseEntity<List<PessoaModel>> listarTodos() {
-        return ResponseEntity.ok(pessoaService.listarTodos());
+        return ResponseEntity.ok(service.listarTodos());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PessoaModel> buscarPorId(@PathVariable Integer id) {
-        return pessoaService.buscarPorId(id)
+        return service.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<?> criar(@RequestBody PessoaModel pessoa) {
+    public ResponseEntity<?> criar(@RequestBody PessoaModel p) {
         try {
-            PessoaModel novaPessoa = pessoaService.criar(pessoa);
-            return ResponseEntity.status(HttpStatus.CREATED).body(novaPessoa);
+            PessoaModel criado = service.criar(p);
+            return ResponseEntity.status(HttpStatus.CREATED).body(criado);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizar(@PathVariable Integer id, @RequestBody PessoaModel pessoa) {
+    public ResponseEntity<?> atualizar(@PathVariable Integer id, @RequestBody PessoaModel p) {
         try {
-            return ResponseEntity.ok(pessoaService.atualizar(id, pessoa));
+            PessoaModel atualizado = service.atualizar(id, p);
+            return ResponseEntity.ok(atualizado);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
@@ -52,6 +54,6 @@ public class PessoaController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable Integer id) {
-        pessoaService.excluir(id);
+        service.excluir(id);
     }
 }
