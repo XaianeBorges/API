@@ -60,4 +60,9 @@ public class HortaService {
             return hortaRepository.save(horta);
         }).orElseThrow(() -> new RuntimeException("Horta não encontrada com id: " + id));
     }
+
+    public void alterarStatus(Integer idHorta, StatusHorta novoStatus) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'alterarStatus'");
+    }
 }

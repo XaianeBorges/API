@@ -1,6 +1,7 @@
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.model.HortaValidacao;
+import com.flordacidade.api.flor_da_cidade_api.model.Horta.StatusHorta;
 import com.flordacidade.api.flor_da_cidade_api.service.HortaValidacaoService;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,9 @@ public class HortaValidacaoController {
     }
 
     @PostMapping
-    public HortaValidacao criarValidacao(@RequestBody HortaValidacao validacao) {
-        return validacaoService.salvarValidacao(validacao);
+    public HortaValidacao validar(
+            @RequestBody HortaValidacao validacao,
+            @RequestParam StatusHorta status) {
+        return validacaoService.validarHorta(validacao, status);
     }
 }
