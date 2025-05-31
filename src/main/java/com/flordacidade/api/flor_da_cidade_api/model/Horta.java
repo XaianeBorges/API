@@ -43,7 +43,7 @@ public class Horta {
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")
-    private Usuario usuario;
+    private UsuarioModel usuario;
 
     @ManyToOne
     @JoinColumn(name = "id_tipo_de_horta")
