@@ -7,12 +7,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
+@Data
 @Table(name = "cursos")
-@Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
+
 public class CursoModel {
 
     @Id
