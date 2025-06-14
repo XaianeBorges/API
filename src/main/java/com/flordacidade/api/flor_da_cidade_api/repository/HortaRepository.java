@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface HortaRepository extends JpaRepository<Horta, Long> {
+public interface HortaRepository extends JpaRepository<Horta, Integer> {
 }

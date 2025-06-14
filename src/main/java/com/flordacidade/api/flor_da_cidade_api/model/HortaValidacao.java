@@ -5,16 +5,19 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "horta_validacao")
 @Data
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @NoArgsConstructor
 @AllArgsConstructor
 public class HortaValidacao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idHortaValidacao;
+    private Integer idHortaValidacao;
 
     @Column(name = "data_visita", nullable = false)
     private LocalDateTime dataVisita;

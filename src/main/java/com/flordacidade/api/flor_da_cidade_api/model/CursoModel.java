@@ -6,8 +6,11 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Data
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @Table(name = "cursos")
 @NoArgsConstructor
 

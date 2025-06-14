@@ -3,7 +3,10 @@ package com.flordacidade.api.flor_da_cidade_api.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @Table(name = "inscricao_curso")
 public class InscricaoCursoModel {
 
@@ -22,15 +25,35 @@ public class InscricaoCursoModel {
     private LocalDateTime dataInscricao = LocalDateTime.now();
 
     // Getters e Setters
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    public Integer getId() {
+        return id;
+    }
 
-    public Integer getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public Integer getIdCurso() { return idCurso; }
-    public void setIdCurso(Integer idCurso) { this.idCurso = idCurso; }
+    public Integer getIdUsuario() {
+        return idUsuario;
+    }
 
-    public LocalDateTime getDataInscricao() { return dataInscricao; }
-    public void setDataInscricao(LocalDateTime dataInscricao) { this.dataInscricao = dataInscricao; }
+    public void setIdUsuario(Integer idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+
+    public Integer getIdCurso() {
+        return idCurso;
+    }
+
+    public void setIdCurso(Integer idCurso) {
+        this.idCurso = idCurso;
+    }
+
+    public LocalDateTime getDataInscricao() {
+        return dataInscricao;
+    }
+
+    public void setDataInscricao(LocalDateTime dataInscricao) {
+        this.dataInscricao = dataInscricao;
+    }
 }

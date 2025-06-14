@@ -33,7 +33,8 @@ public class InscricaoCursoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<InscricaoCursoModel> atualizar(@PathVariable Integer id, @RequestBody InscricaoCursoModel atualizada) {
+    public ResponseEntity<InscricaoCursoModel> atualizar(@PathVariable Integer id,
+            @RequestBody InscricaoCursoModel atualizada) {
         return ResponseEntity.ok(service.atualizar(id, atualizada));
     }
 

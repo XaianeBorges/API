@@ -10,6 +10,8 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,15 +19,16 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class UsuarioModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
-    private Integer id;
+    private Integer idUsuario;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @JoinColumn(name = "id_pessoa", nullable = false)
     @NotNull
     private PessoaModel pessoa;

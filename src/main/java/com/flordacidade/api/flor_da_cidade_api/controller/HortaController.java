@@ -22,7 +22,7 @@ public class HortaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Horta> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<Horta> buscarPorId(@PathVariable Integer id) {
         return hortaService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -34,28 +34,23 @@ public class HortaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Horta> atualizar(@PathVariable Long id, @RequestBody Horta horta) {
-        try {
-            Horta atualizada = hortaService.atualizar(id, horta);
-            return ResponseEntity.ok(atualizada);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Horta> atualizar(@PathVariable Integer id, @RequestBody Horta horta) {
+        // Agora o try-catch não é mais necessário se a exceção já tem @ResponseStatus
+        // O Spring irá capturar a ResourceNotFoundException e retornar 404
+        // automaticamente.
+        Horta atualizada = hortaService.atualizar(id, horta);
+        return ResponseEntity.ok(atualizada);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         hortaService.deletar(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Horta> alterarStatus(@PathVariable Long id, @RequestParam StatusHorta status) {
-        try {
-            Horta horta = hortaService.alterarStatus(id, status);
-            return ResponseEntity.ok(horta);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Horta> alterarStatus(@PathVariable Integer id, @RequestParam Horta.StatusHorta status) {
+        Horta horta = hortaService.alterarStatus(id, status);
+        return ResponseEntity.ok(horta);
     }
 }

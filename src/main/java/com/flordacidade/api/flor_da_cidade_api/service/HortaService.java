@@ -1,10 +1,23 @@
 package com.flordacidade.api.flor_da_cidade_api.service;
 
+import com.flordacidade.api.flor_da_cidade_api.model.AreaClassificacao;
+import com.flordacidade.api.flor_da_cidade_api.model.AtividadesProdutivas;
 import com.flordacidade.api.flor_da_cidade_api.model.Horta;
 import com.flordacidade.api.flor_da_cidade_api.model.Horta.StatusHorta;
+import com.flordacidade.api.flor_da_cidade_api.model.ResourceNotFoundException;
+import com.flordacidade.api.flor_da_cidade_api.model.TipoDeHorta;
+import com.flordacidade.api.flor_da_cidade_api.model.UnidadeEnsino;
+import com.flordacidade.api.flor_da_cidade_api.model.UsuarioModel;
+import com.flordacidade.api.flor_da_cidade_api.repository.AreaClassificacaoRepository;
+import com.flordacidade.api.flor_da_cidade_api.repository.AtividadesProdutivasRepository;
 import com.flordacidade.api.flor_da_cidade_api.repository.HortaRepository;
+import com.flordacidade.api.flor_da_cidade_api.repository.TipoDeHortaRepository;
+import com.flordacidade.api.flor_da_cidade_api.repository.UnidadeEnsinoRepository;
+import com.flordacidade.api.flor_da_cidade_api.repository.UsuarioRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,54 +28,133 @@ public class HortaService {
     @Autowired
     private HortaRepository hortaRepository;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    @Autowired
+    private UnidadeEnsinoRepository unidadeEnsinoRepository;
+    @Autowired
+    private AreaClassificacaoRepository areaClassificacaoRepository;
+    @Autowired
+    private AtividadesProdutivasRepository atividadesProdutivasRepository;
+    @Autowired
+    private TipoDeHortaRepository tipoDeHortaRepository;
+
     public List<Horta> listarTodas() {
         return hortaRepository.findAll();
     }
 
-    public Optional<Horta> buscarPorId(Long id) {
+    public Optional<Horta> buscarPorId(Integer id) {
         return hortaRepository.findById(id);
     }
 
     public Horta salvar(Horta horta) {
+        // A lógica para salvar um novo também pode ser melhorada para buscar as
+        // entidades
         return hortaRepository.save(horta);
     }
 
-    public Horta atualizar(Long id, Horta hortaAtualizada) {
-        return hortaRepository.findById(id).map(horta -> {
-            horta.setFuncaoUniEnsino(hortaAtualizada.getFuncaoUniEnsino());
-            horta.setStatusHorta(hortaAtualizada.getStatusHorta());
-            horta.setOcupacaoPrincipal(hortaAtualizada.getOcupacaoPrincipal());
-            horta.setEndereco(hortaAtualizada.getEndereco());
-            horta.setEnderecoAlternativo(hortaAtualizada.getEnderecoAlternativo());
-            horta.setUnidadeEnsino(hortaAtualizada.getUnidadeEnsino());
-            horta.setTamanhoAreaProducao(hortaAtualizada.getTamanhoAreaProducao());
-            horta.setAreaClassificacao(hortaAtualizada.getAreaClassificacao());
-            horta.setAtividadesProdutivas(hortaAtualizada.getAtividadesProdutivas());
-            horta.setCaracteristicaGrupo(hortaAtualizada.getCaracteristicaGrupo());
-            horta.setQntPessoas(hortaAtualizada.getQntPessoas());
-            horta.setAtividadeDescricao(hortaAtualizada.getAtividadeDescricao());
-            horta.setImagemCaminho(hortaAtualizada.getImagemCaminho());
-            horta.setUsuario(hortaAtualizada.getUsuario());
-            horta.setTipoDeHorta(hortaAtualizada.getTipoDeHorta());
-            horta.setParceria(hortaAtualizada.getParceria());
-            return hortaRepository.save(horta);
-        }).orElseThrow(() -> new RuntimeException("Horta não encontrada com id: " + id));
+    @Transactional // Garante que todas as operações de banco aconteçam em uma única transação
+    public Horta atualizar(Integer id, Horta hortaAtualizada) {
+        // 1. Busca a horta existente no banco. Se não encontrar, lança a exceção.
+        Horta hortaExistente = hortaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada com id: " + id));
+
+        // 2. Atualiza os campos simples (Strings, números, etc)
+        // Adicionei verificações de nulidade para permitir atualizações parciais
+        // (PATCH-style)
+        if (hortaAtualizada.getFuncaoUniEnsino() != null)
+            hortaExistente.setFuncaoUniEnsino(hortaAtualizada.getFuncaoUniEnsino());
+        if (hortaAtualizada.getStatusHorta() != null)
+            hortaExistente.setStatusHorta(hortaAtualizada.getStatusHorta());
+        if (hortaAtualizada.getOcupacaoPrincipal() != null)
+            hortaExistente.setOcupacaoPrincipal(hortaAtualizada.getOcupacaoPrincipal());
+        if (hortaAtualizada.getEndereco() != null)
+            hortaExistente.setEndereco(hortaAtualizada.getEndereco());
+        if (hortaAtualizada.getEnderecoAlternativo() != null)
+            hortaExistente.setEnderecoAlternativo(hortaAtualizada.getEnderecoAlternativo());
+        if (hortaAtualizada.getUnidadeDeEnsino() != null)
+            hortaExistente.setUnidadeDeEnsino(hortaAtualizada.getUnidadeDeEnsino());
+        if (hortaAtualizada.getTamanhoAreaProducao() != null)
+            hortaExistente.setTamanhoAreaProducao(hortaAtualizada.getTamanhoAreaProducao());
+        if (hortaAtualizada.getAreaClassificacao() != null)
+            hortaExistente.setAreaClassificacao(hortaAtualizada.getAreaClassificacao());
+        if (hortaAtualizada.getAtividadesProdutivas() != null)
+            hortaExistente.setAtividadesProdutivas(hortaAtualizada.getAtividadesProdutivas());
+        if (hortaAtualizada.getCaracteristicaGrupo() != null)
+            hortaExistente.setCaracteristicaGrupo(hortaAtualizada.getCaracteristicaGrupo());
+        if (hortaAtualizada.getQntPessoas() != null)
+            hortaExistente.setQntPessoas(hortaAtualizada.getQntPessoas());
+        if (hortaAtualizada.getAtividadeDescricao() != null)
+            hortaExistente.setAtividadeDescricao(hortaAtualizada.getAtividadeDescricao());
+        if (hortaAtualizada.getImagemCaminho() != null)
+            hortaExistente.setImagemCaminho(hortaAtualizada.getImagemCaminho());
+        if (hortaAtualizada.getUsuario() != null)
+            hortaExistente.setUsuario(hortaAtualizada.getUsuario());
+        if (hortaAtualizada.getTipoDeHorta() != null)
+            hortaExistente.setTipoDeHorta(hortaAtualizada.getTipoDeHorta());
+        if (hortaAtualizada.getParceria() != null)
+            hortaExistente.setParceria(hortaAtualizada.getParceria());
+
+        // 3. Atualiza os relacionamentos buscando as entidades completas no banco
+        if (hortaAtualizada.getUsuario() != null && hortaAtualizada.getUsuario().getIdUsuario() != null) {
+            UsuarioModel usuario = usuarioRepository.findById(hortaAtualizada.getUsuario().getIdUsuario())
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário de referência não encontrado com id: "
+                            + hortaAtualizada.getUsuario().getIdUsuario()));
+            hortaExistente.setUsuario(usuario);
+        }
+
+        if (hortaAtualizada.getUnidadeDeEnsino() != null
+                && hortaAtualizada.getUnidadeDeEnsino().getIdUnidadeDeEnsino() != null) {
+            UnidadeEnsino unidadeEnsino = unidadeEnsinoRepository
+                    .findById(hortaAtualizada.getUnidadeDeEnsino().getIdUnidadeDeEnsino())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Unidade de Ensino de referência não encontrada com id: "
+                                    + hortaAtualizada.getUnidadeDeEnsino().getIdUnidadeDeEnsino()));
+            hortaExistente.setUnidadeDeEnsino(unidadeEnsino);
+        }
+
+        if (hortaAtualizada.getAreaClassificacao() != null
+                && hortaAtualizada.getAreaClassificacao().getIdAreaClassificacao() != null) {
+            AreaClassificacao area = areaClassificacaoRepository
+                    .findById(hortaAtualizada.getAreaClassificacao().getIdAreaClassificacao())
+                    .orElseThrow(() -> new ResourceNotFoundException("Área de Classificação não encontrada com id: "
+                            + hortaAtualizada.getAreaClassificacao().getIdAreaClassificacao()));
+            hortaExistente.setAreaClassificacao(area);
+        }
+
+        if (hortaAtualizada.getAtividadesProdutivas() != null
+                && hortaAtualizada.getAtividadesProdutivas().getIdAtividadesProdutivas() != null) {
+            AtividadesProdutivas atividade = atividadesProdutivasRepository
+                    .findById(hortaAtualizada.getAtividadesProdutivas().getIdAtividadesProdutivas())
+                    .orElseThrow(() -> new ResourceNotFoundException("Atividade Produtiva não encontrada com id: "
+                            + hortaAtualizada.getAtividadesProdutivas().getIdAtividadesProdutivas()));
+            hortaExistente.setAtividadesProdutivas(atividade);
+        }
+
+        if (hortaAtualizada.getTipoDeHorta() != null && hortaAtualizada.getTipoDeHorta().getIdTipoDeHorta() != null) {
+            TipoDeHorta tipo = tipoDeHortaRepository.findById(hortaAtualizada.getTipoDeHorta().getIdTipoDeHorta())
+                    .orElseThrow(() -> new ResourceNotFoundException("Tipo de Horta não encontrada com id: "
+                            + hortaAtualizada.getTipoDeHorta().getIdTipoDeHorta()));
+            hortaExistente.setTipoDeHorta(tipo);
+        }
+
+        // 4. Salva a entidade Horta com os dados e relacionamentos corretos
+        // O campo dataAtualizacao será atualizado automaticamente pela anotação
+        // @UpdateTimestamp
+        return hortaRepository.save(hortaExistente);
     }
 
-    public void deletar(Long id) {
+    public void deletar(Integer id) {
+        if (!hortaRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Horta não encontrada com id: " + id);
+        }
         hortaRepository.deleteById(id);
     }
 
-    // Método específico para alterar status da horta
-    public Horta alterarStatus(Long id, StatusHorta status) {
-        return hortaRepository.findById(id).map(horta -> {
-            horta.setStatusHorta(status);
-            return hortaRepository.save(horta);
-        }).orElseThrow(() -> new RuntimeException("Horta não encontrada com id: " + id));
-    }
-
-    public void alterarStatus(Integer idHorta, StatusHorta novoStatus) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'alterarStatus'");
+    public Horta alterarStatus(Integer id, Horta.StatusHorta status) {
+        Horta horta = hortaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada com id: " + id));
+        horta.setStatusHorta(status);
+        return hortaRepository.save(horta);
     }
 }
