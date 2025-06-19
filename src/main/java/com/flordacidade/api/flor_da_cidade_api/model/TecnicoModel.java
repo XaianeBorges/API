@@ -1,15 +1,14 @@
-// src/main/java/com/flordacidade/api/flordacidade/api/flor_da_cidade_api/model/TecnicoModel.java
 package com.flordacidade.api.flor_da_cidade_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -19,6 +18,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "tecnico")
 public class TecnicoModel {
 
+    // --- INÍCIO DA ALTERAÇÃO ---
+    // O Enum foi movido para dentro da classe TecnicoModel.
+    // Isso resolve o erro "TecnicoStatus cannot be resolved" sem criar um novo arquivo.
+    public enum TecnicoStatus {
+        ATIVO,
+        INATIVO
+    }
+    // --- FIM DA ALTERAÇÃO ---
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_tecnico")
@@ -26,9 +34,9 @@ public class TecnicoModel {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private TecnicoStatus status = TecnicoStatus.ATIVO;
+    private TecnicoStatus status = TecnicoStatus.ATIVO; // Agora isso funciona corretamente.
 
-    @Column(name = "matricula", nullable = false)
+    @Column(name = "matricula", nullable = false, unique = true)
     private String matricula;
 
     @CreationTimestamp
@@ -42,9 +50,11 @@ public class TecnicoModel {
     @Column(name = "senha", nullable = false)
     private String senha;
 
-    @Column(name = "regiao")
-    private String regiao;
-
     @Column(name = "nome", nullable = false, length = 45)
     private String nome;
+
+    // Mapeamento corrigido da relação com a entidade RegiaoModel
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "regiao_id", referencedColumnName = "id_regiao", nullable = false)
+    private RegiaoModel regiao;
 }

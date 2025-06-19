@@ -57,5 +57,3 @@ public class CursoImagemController {
         }
     }
 }
-//thjhrjhlsxtyhjnç
-{System.out.println("só Jesus")}
