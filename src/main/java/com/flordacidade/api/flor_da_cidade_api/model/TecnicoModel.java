@@ -3,7 +3,9 @@ package com.flordacidade.api.flor_da_cidade_api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,6 +17,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Getter
+@Setter
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @Table(name = "tecnico")
 public class TecnicoModel {
@@ -47,4 +51,11 @@ public class TecnicoModel {
 
     @Column(name = "nome", nullable = false, length = 45)
     private String nome;
+
+    // enums
+
+    public enum TecnicoStatus {
+        ATIVO,
+        INATIVO;
+    }
 }

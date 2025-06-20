@@ -2,6 +2,7 @@ package com.flordacidade.api.flor_da_cidade_api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -9,53 +10,53 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.LocalDateTime;
 
-import java.sql.Timestamp;
-
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @Entity
-@Data // Cuidado com @Data em entidades JPA, pode causar problemas. @Getter, @Setter,
-      // @NoArgsConstructor é mais seguro.
+@Table(name = "horta")
+@Data
 public class Horta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_horta")
     private Integer idHorta;
 
-    private String funcaoUniEnsino;
+    @Column(name = "nome_horta")
+    private String nomeHorta;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status_horta", nullable = false)
-    private StatusHorta statusHorta = StatusHorta.PENDENTE;
+    private StatusHorta statusHorta;
 
+    @Column(name = "funcao_uni_ensino")
+    private String funcaoUniEnsino;
+
+    @Column(name = "ocupacao_principal")
     private String ocupacaoPrincipal;
+
+    @Column(name = "endereco", nullable = false)
     private String endereco;
+
+    @Column(name = "endereco_alternativo")
     private String enderecoAlternativo;
+
+    @Column(name = "tamanho_area_producao", nullable = false)
     private Float tamanhoAreaProducao;
+
+    @Column(name = "caracteristica_grupo")
     private String caracteristicaGrupo;
+
+    @Column(name = "qnt_pessoas", nullable = false)
     private Integer qntPessoas;
+
+    @Column(name = "atividade_descricao", nullable = false)
     private String atividadeDescricao;
+
+    @Column(name = "imagem_caminho", nullable = false)
     private String imagemCaminho;
+
+    @Column(name = "parceria")
     private String parceria;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_unidade_ensino")
-    private UnidadeEnsino unidadeDeEnsino;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_area_classificacao")
-    private AreaClassificacao areaClassificacao;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_atividades_produtivas")
-    private AtividadesProdutivas atividadesProdutivas;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario")
-    private UsuarioModel usuario;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_tipo_de_horta")
-    private TipoDeHorta tipoDeHorta;
 
     @CreationTimestamp
     @Column(name = "data_criacao", updatable = false)
@@ -65,7 +66,28 @@ public class Horta {
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_unidade_ensino", nullable = false)
+    private UnidadeEnsino unidadeDeEnsino;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_area_classificacao", nullable = false)
+    private AreaClassificacao areaClassificacao;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_atividades_produtivas", nullable = false)
+    private AtividadesProdutivas atividadesProdutivas;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private UsuarioModel usuario; // Usando UsuarioModel para consistência
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tipo_de_horta", nullable = false)
+    private TipoDeHorta tipoDeHorta;
+
+    // --- ENUM para Status ---
     public enum StatusHorta {
-        ATIVA, PENDENTE, VISITA_AGENDADA, INATIVA
+        ATIVA, PENDENTE, INATIVA, VISITA_AGENDADA
     }
 }

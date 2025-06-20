@@ -3,7 +3,6 @@ package com.flordacidade.api.flor_da_cidade_api.service;
 import com.flordacidade.api.flor_da_cidade_api.model.AreaClassificacao;
 import com.flordacidade.api.flor_da_cidade_api.model.AtividadesProdutivas;
 import com.flordacidade.api.flor_da_cidade_api.model.Horta;
-import com.flordacidade.api.flor_da_cidade_api.model.Horta.StatusHorta;
 import com.flordacidade.api.flor_da_cidade_api.model.ResourceNotFoundException;
 import com.flordacidade.api.flor_da_cidade_api.model.TipoDeHorta;
 import com.flordacidade.api.flor_da_cidade_api.model.UnidadeEnsino;
@@ -18,6 +17,7 @@ import com.flordacidade.api.flor_da_cidade_api.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +38,8 @@ public class HortaService {
     private AtividadesProdutivasRepository atividadesProdutivasRepository;
     @Autowired
     private TipoDeHortaRepository tipoDeHortaRepository;
+    @Autowired
+    private FileStorageService fileStorageService;
 
     public List<Horta> listarTodas() {
         return hortaRepository.findAll();
@@ -47,9 +49,50 @@ public class HortaService {
         return hortaRepository.findById(id);
     }
 
-    public Horta salvar(Horta horta) {
-        // A lógica para salvar um novo também pode ser melhorada para buscar as
-        // entidades
+    @Transactional
+    public Horta salvar(Horta horta, MultipartFile imagem, Integer idUsuario, Integer idUnidadeEnsino,
+            Integer idAreaClassificacao, Integer idAtividadesProdutivas, Integer idTipoDeHorta) {
+
+        // 1. Validação de IDs e busca das entidades relacionadas
+        UsuarioModel usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + idUsuario));
+
+        UnidadeEnsino unidadeEnsino = unidadeEnsinoRepository.findById(idUnidadeEnsino)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Unidade de Ensino não encontrada com id: " + idUnidadeEnsino));
+
+        AreaClassificacao area = areaClassificacaoRepository.findById(idAreaClassificacao)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Área de Classificação não encontrada com id: " + idAreaClassificacao));
+
+        AtividadesProdutivas atividade = atividadesProdutivasRepository.findById(idAtividadesProdutivas)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Atividade Produtiva não encontrada com id: " + idAtividadesProdutivas));
+
+        TipoDeHorta tipo = tipoDeHortaRepository.findById(idTipoDeHorta)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Tipo de Horta não encontrado com id: " + idTipoDeHorta));
+
+        // 2. Associa as entidades encontradas ao objeto Horta
+        horta.setUsuario(usuario);
+        horta.setUnidadeDeEnsino(unidadeEnsino);
+        horta.setAreaClassificacao(area);
+        horta.setAtividadesProdutivas(atividade);
+        horta.setTipoDeHorta(tipo);
+
+        // 3. Salva o arquivo de imagem no disco
+        if (imagem != null && !imagem.isEmpty()) {
+            String nomeArquivo = fileStorageService.storeFile(imagem);
+            horta.setImagemCaminho(nomeArquivo);
+        } else {
+            // Se a imagem for obrigatória, lance uma exceção aqui
+            throw new RuntimeException("A imagem da horta é obrigatória.");
+        }
+
+        // 4. Define o status inicial como PENDENTE por padrão
+        horta.setStatusHorta(Horta.StatusHorta.PENDENTE);
+
+        // 5. Salva a entidade Horta completa no banco de dados
         return hortaRepository.save(horta);
     }
 
@@ -62,6 +105,8 @@ public class HortaService {
         // 2. Atualiza os campos simples (Strings, números, etc)
         // Adicionei verificações de nulidade para permitir atualizações parciais
         // (PATCH-style)
+        if (hortaAtualizada.getNomeHorta() != null)
+            hortaExistente.setNomeHorta(hortaAtualizada.getNomeHorta());
         if (hortaAtualizada.getFuncaoUniEnsino() != null)
             hortaExistente.setFuncaoUniEnsino(hortaAtualizada.getFuncaoUniEnsino());
         if (hortaAtualizada.getStatusHorta() != null)
@@ -139,8 +184,6 @@ public class HortaService {
         }
 
         // 4. Salva a entidade Horta com os dados e relacionamentos corretos
-        // O campo dataAtualizacao será atualizado automaticamente pela anotação
-        // @UpdateTimestamp
         return hortaRepository.save(hortaExistente);
     }
 

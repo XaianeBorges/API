@@ -43,4 +43,15 @@ public class PessoaModel {
         @Enumerated(EnumType.STRING)
         @Column(nullable = false, length = 50)
         private Escolaridade escolaridade;
+
+        public enum Escolaridade {
+                SEM_ESCOLARIDADE,
+                ENSINO_FUNDAMENTAL_INCOMPLETO,
+                ENSINO_FUNDAMENTAL_COMPLETO,
+                ENSINO_MEDIO_INCOMPLETO,
+                ENSINO_MEDIO_COMPLETO,
+                ENSINO_SUPERIOR_INCOMPLETO,
+                ENSINO_SUPERIOR_COMPLETO,
+                POS_GRADUACAO;
+        }
 }
