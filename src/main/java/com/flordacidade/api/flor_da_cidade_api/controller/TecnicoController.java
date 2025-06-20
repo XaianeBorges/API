@@ -1,4 +1,3 @@
-// src/main/java/com/flordacidade/api/flordacidade/api/flor_da_cidade_api/controller/TecnicoController.java
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.model.TecnicoModel;

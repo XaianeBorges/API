@@ -1,4 +1,3 @@
-// src/main/java/com/flordacidade/api/flor_da_cidade_api/service/TecnicoService.java
 package com.flordacidade.api.flor_da_cidade_api.service;
 
 import com.flordacidade.api.flor_da_cidade_api.model.TecnicoModel;
@@ -18,6 +17,8 @@ public class TecnicoService {
         this.repository = repository;
     }
 
+    // --- Métodos CRUD ---
+
     public List<TecnicoModel> getAll() {
         return repository.findAll();
     }
@@ -30,23 +31,25 @@ public class TecnicoService {
         return repository.save(tecnico);
     }
 
-    public Optional<TecnicoModel> update(Integer id, TecnicoModel tecnico) {
+    public Optional<TecnicoModel> update(Integer id, TecnicoModel tecnicoDetails) {
         return repository.findById(id)
-                .map(existing -> {
-                    existing.setStatus(tecnico.getStatus());
-                    existing.setMatricula(tecnico.getMatricula());
-                    existing.setSenha(tecnico.getSenha());
-                    existing.setRegiao(tecnico.getRegiao());
-                    existing.setNome(tecnico.getNome());
-                    return repository.save(existing);
+                .map(existingTecnico -> {
+                    existingTecnico.setNome(tecnicoDetails.getNome());
+                    existingTecnico.setMatricula(tecnicoDetails.getMatricula());
+                    existingTecnico.setSenha(tecnicoDetails.getSenha());
+                    existingTecnico.setStatus(tecnicoDetails.getStatus());
+                    existingTecnico.setRegiao(tecnicoDetails.getRegiao());
+                    return repository.save(existingTecnico);
                 });
-    }
-
-    public Optional<TecnicoModel> authenticate(String matricula, String senha) {
-        return repository.findByMatriculaAndSenha(matricula, senha);
     }
 
     public void delete(Integer id) {
         repository.deleteById(id);
+    }
+
+    // --- Método de Autenticação ---
+
+    public Optional<TecnicoModel> authenticate(String matricula, String senha) {
+        return repository.findByMatriculaAndSenha(matricula, senha);
     }
 }

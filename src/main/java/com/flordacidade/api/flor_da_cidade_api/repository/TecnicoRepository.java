@@ -1,4 +1,3 @@
-// src/main/java/com/flordacidade/api/flor_da_cidade_api/repository/TecnicoRepository.java
 package com.flordacidade.api.flor_da_cidade_api.repository;
 
 import com.flordacidade.api.flor_da_cidade_api.model.TecnicoModel;
@@ -9,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface TecnicoRepository extends JpaRepository<TecnicoModel, Integer> {
+
     Optional<TecnicoModel> findByMatriculaAndSenha(String matricula, String senha);
 }

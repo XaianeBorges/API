@@ -1,19 +1,18 @@
 package com.flordacidade.api.flor_da_cidade_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Data
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @Table(name = "cursos")
 @NoArgsConstructor
-
 public class CursoModel {
 
     @Id
@@ -73,24 +72,10 @@ public class CursoModel {
     @Column(nullable = false)
     private Integer cargaHoraria = 0;
 
-    public void setIdCurso(Integer id) {
-        this.idCurso = id;
-    }
+    public enum TipoAtividade { Curso, Oficina }
+    public enum PublicoAlvo { Geral, Interno, Comunidade, Estudantes, Idosos }
+    public enum Turno { Manhã, Tarde, Noite }
 
-    // Enums
-    public enum TipoAtividade {
-        Curso, Oficina
-    }
-
-    public enum PublicoAlvo {
-        Geral, Interno, Comunidade, Estudantes, Idosos
-    }
-
-    public enum Turno {
-        Manhã, Tarde, Noite
-    }
-
-    // Ciclo de vida
     @PrePersist
     protected void onCreate() {
         dataCriacao = dataAtualizacao = LocalDateTime.now();

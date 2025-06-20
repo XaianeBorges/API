@@ -2,7 +2,7 @@ package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.model.TecnicoModel;
 import com.flordacidade.api.flor_da_cidade_api.service.TecnicoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,27 +11,30 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final TecnicoService tecnicoService;
 
-    @Autowired
-    public AuthController(TecnicoService tecnicoService) {
-        this.tecnicoService = tecnicoService;
-    }
-
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String matricula = body.get("matricula");
-        String senha = body.get("senha");
+    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
+        String matricula = credentials.get("matricula");
+        String senha = credentials.get("senha");
 
-        Optional<TecnicoModel> tecnico = tecnicoService.authenticate(matricula, senha);
+        Optional<TecnicoModel> tecnicoOptional = tecnicoService.authenticate(matricula, senha);
 
-        if (tecnico.isPresent()) {
-            return ResponseEntity.ok(tecnico.get());
+        if (tecnicoOptional.isPresent()) {
+            TecnicoModel tecnicoAutenticado = tecnicoOptional.get();
+
+            // Cria um mapa para a resposta, evitando expor a senha no JSON.
+            Map<String, Object> response = Map.of(
+                    "idTecnico", tecnicoAutenticado.getIdTecnico(),
+                    "nome", tecnicoAutenticado.getNome(),
+                    "matricula", tecnicoAutenticado.getMatricula()
+            );
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(401).body(Map.of("error", "Usuário ou senha inválidos"));
+            return ResponseEntity.status(401).body("Matrícula ou senha inválidos.");
         }
     }
 }
