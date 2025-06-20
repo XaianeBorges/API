@@ -7,13 +7,14 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
+@Data
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @Table(name = "pessoa", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "cpf"),
-        @UniqueConstraint(columnNames = "email"),
-        @UniqueConstraint(columnNames = "telefone")
+                @UniqueConstraint(columnNames = "cpf"),
+                @UniqueConstraint(columnNames = "email"),
+                @UniqueConstraint(columnNames = "telefone")
 })
-@Data
+
 public class PessoaModel {
 
     public enum Escolaridade {
@@ -24,7 +25,7 @@ public class PessoaModel {
         SUPERIOR_INCOMPLETO,
         SUPERIOR_COMPLETO,
         POS_GRADUACAO
-    }
+        }
     // --- FIM DA CORREÇÃO ---
 
     @Id
@@ -51,5 +52,6 @@ public class PessoaModel {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private Escolaridade escolaridade; // Esta linha agora funciona corretamente.
+    private Escolaridade escolaridade;
+    
 }

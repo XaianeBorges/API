@@ -24,6 +24,10 @@ public class HortaValidacao {
 
     private String obs;
 
+    @ManyToOne
+    @JoinColumn(name = "id_tecnico", nullable = false)
+    private TecnicoModel tecnico;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "id_horta")
     private Horta horta;
