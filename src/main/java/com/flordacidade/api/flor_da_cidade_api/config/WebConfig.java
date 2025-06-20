@@ -2,33 +2,24 @@ package com.flordacidade.api.flor_da_cidade_api.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Value("${cors.allowed-origins:http://localhost:5173}")
-    private String allowedOrigins;
-
-    // Esta variável agora irá carregar o caminho './uploads/banners'
+    // Carrega o valor de 'file.upload-dir' do application.properties.
+    // Atualmente: ./uploads/banners
     @Value("${file.upload-dir}")
     private String uploadDir;
-    
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins(allowedOrigins)
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
-    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Mapeia a URL exata que o front-end está pedindo...
+        // Quando uma requisição chegar para /uploads/banners/QUALQUER_COISA...
         registry.addResourceHandler("/uploads/banners/**")
-                // ...para a pasta exata definida em 'file.upload-dir'.
-                // O "file:" é crucial para indicar que é um caminho no sistema de arquivos.
+                // Sirva os arquivos da pasta definida em 'uploadDir'.
+                // O "file:" indica que é um caminho no sistema de arquivos.
+                // O "/" no final de uploadDir + "/" garante que é um diretório.
                 .addResourceLocations("file:" + uploadDir + "/");
     }
 }
