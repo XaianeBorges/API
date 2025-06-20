@@ -1,4 +1,3 @@
-
 package com.flordacidade.api.flor_da_cidade_api.config;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -10,35 +9,26 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    // Injeta a URL permitida pelo CORS a partir do application.properties
     @Value("${cors.allowed-origins:http://localhost:5173}")
     private String allowedOrigins;
 
-    // Injeta o diretório raiz de uploads a partir do application.properties.
-    // Se a propriedade não for encontrada, usa './uploads' como valor padrão.
-    @Value("${file.upload-dir:./uploads}")
+    // Esta variável agora irá carregar o caminho './uploads/banners'
+    @Value("${file.upload-dir}")
     private String uploadDir;
-
-    /**
-     * Configura o CORS (Cross-Origin Resource Sharing) para a aplicação.
-     * Permite que o front-end acesse este back-end.
-     */
+    
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // Aplica a todos os endpoints
-                .allowedOrigins(allowedOrigins) // Usa a URL definida no .properties
+        registry.addMapping("/**")
+                .allowedOrigins(allowedOrigins)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
     }
 
-    /**
-     * Configura o mapeamento de recursos estáticos (imagens, etc.).
-     * Isso permite que os arquivos salvos no disco sejam acessíveis via URL.
-     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Mapeia qualquer requisição que comece com /uploads/**...
-        registry.addResourceHandler("/uploads/**")
-                // ...para a pasta definida em 'file.upload-dir' no sistema de arquivos.
+        // Mapeia a URL exata que o front-end está pedindo...
+        registry.addResourceHandler("/uploads/banners/**")
+                // ...para a pasta exata definida em 'file.upload-dir'.
+                // O "file:" é crucial para indicar que é um caminho no sistema de arquivos.
                 .addResourceLocations("file:" + uploadDir + "/");
     }
 }
