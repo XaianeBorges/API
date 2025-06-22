@@ -17,6 +17,7 @@ public class HortaValidacao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_horta_validacao") // Adicionei para clareza, mas é opcional
     private Integer idHortaValidacao;
 
     @Column(name = "data_visita", nullable = false)
@@ -24,11 +25,11 @@ public class HortaValidacao {
 
     private String obs;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) // Usar LAZY é uma boa prática
     @JoinColumn(name = "id_tecnico", nullable = false)
     private TecnicoModel tecnico;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "id_horta")
+    @ManyToOne(fetch = FetchType.LAZY) // Usar LAZY é uma boa prática
+    @JoinColumn(name = "id_horta", nullable = false)
     private Horta horta;
 }

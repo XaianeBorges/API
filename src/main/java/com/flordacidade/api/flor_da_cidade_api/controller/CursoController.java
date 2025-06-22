@@ -1,30 +1,38 @@
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.model.CursoModel;
-import com.flordacidade.api.flor_da_cidade_api.model.CursoModel.PublicoAlvo;
-import com.flordacidade.api.flor_da_cidade_api.model.CursoModel.TipoAtividade;
-import com.flordacidade.api.flor_da_cidade_api.model.CursoModel.Turno;
 import com.flordacidade.api.flor_da_cidade_api.service.CursoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cursos")
-@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class CursoController {
 
-    @Autowired
-    private CursoService cursoService;
+    private final CursoService cursoService;
+
+    @GetMapping("/opcoes")
+    public ResponseEntity<Map<String, List<String>>> getFormOptions() {
+        Map<String, List<String>> options = Map.of(
+                "tiposAtividade", Arrays.stream(CursoModel.TipoAtividade.values()).map(Enum::name).collect(Collectors.toList()),
+                "publicosAlvo", Arrays.stream(CursoModel.PublicoAlvo.values()).map(Enum::name).collect(Collectors.toList()),
+                "turnos", Arrays.stream(CursoModel.Turno.values()).map(Enum::name).collect(Collectors.toList())
+        );
+        return ResponseEntity.ok(options);
+    }
 
     @GetMapping
-    public List<CursoModel> listarTodos() {
-        return cursoService.listarTodos();
+    public ResponseEntity<List<CursoModel>> listarTodos() {
+        return ResponseEntity.ok(cursoService.listarTodos());
     }
 
     @GetMapping("/{id}")
@@ -34,47 +42,21 @@ public class CursoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<CursoModel> criar(
-
-            @RequestParam("tipoAtividade") TipoAtividade tipoAtividade,
-            @RequestParam("nome") String nome,
-            @RequestParam("descricao") String descricao,
-            @RequestParam("local") String local,
-            @RequestParam("instituicao") String instituicao,
-            @RequestParam("publicoAlvo") PublicoAlvo publicoAlvo,
-            @RequestParam("dataInicio") LocalDate dataInicio,
-            @RequestParam("dataFim") LocalDate dataFim,
-            @RequestParam("dataInscInicio") LocalDate dataInscInicio,
-            @RequestParam("dataInscFim") LocalDate dataInscFim,
-            @RequestParam("turno") Turno turno,
-            @RequestParam("maxPessoas") int maxPessoas,
-            @RequestParam("cargaHoraria") int cargaHoraria,
-            @RequestParam(value = "fotoBanner", required = false) MultipartFile fotoBanner) {
-        CursoModel novoCurso = new CursoModel();
-
-        novoCurso.setTipoAtividade(tipoAtividade);
-        novoCurso.setNome(nome);
-        novoCurso.setDescricao(descricao);
-        novoCurso.setLocal(local);
-        novoCurso.setInstituicao(instituicao);
-        novoCurso.setPublicoAlvo(publicoAlvo);
-        novoCurso.setDataInicio(dataInicio);
-        novoCurso.setDataFim(dataFim);
-        novoCurso.setDataInscInicio(dataInscInicio);
-        novoCurso.setDataInscFim(dataInscFim);
-        novoCurso.setTurno(turno);
-        novoCurso.setMaxPessoas(maxPessoas);
-        novoCurso.setCargaHoraria(cargaHoraria);
-        novoCurso.setAtivo(true);
-
-        CursoModel cursoSalvo = cursoService.salvar(novoCurso, fotoBanner);
-        return ResponseEntity.status(HttpStatus.CREATED).body(cursoSalvo); // Boa prática: retornar 201 CREATED
+            @RequestPart("curso") CursoModel curso,
+            @RequestPart(value = "banner", required = false) MultipartFile bannerFile) {
+        CursoModel cursoSalvo = cursoService.salvar(curso, bannerFile);
+        return ResponseEntity.status(HttpStatus.CREATED).body(cursoSalvo);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<CursoModel> atualizar(@PathVariable Integer id, @RequestBody CursoModel curso) {
-        return ResponseEntity.ok(cursoService.atualizar(id, curso));
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<CursoModel> atualizar(
+            @PathVariable Integer id,
+            @RequestPart("curso") CursoModel cursoDetails,
+            @RequestPart(value = "banner", required = false) MultipartFile bannerFile) {
+        CursoModel cursoAtualizado = cursoService.atualizar(id, cursoDetails, bannerFile);
+        return ResponseEntity.ok(cursoAtualizado);
     }
 
     @DeleteMapping("/{id}")
