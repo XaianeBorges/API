@@ -72,9 +72,17 @@ public class CursoModel {
     @Column(nullable = false)
     private Integer cargaHoraria = 0;
 
-    public enum TipoAtividade { Curso, Oficina }
-    public enum PublicoAlvo { Geral, Interno, Comunidade, Estudantes, Idosos }
-    public enum Turno { Manhã, Tarde, Noite }
+    public enum TipoAtividade {
+        Curso, Oficina
+    }
+
+    public enum PublicoAlvo {
+        Geral, Interno, Comunidade, Estudantes, Idosos
+    }
+
+    public enum Turno {
+        Manhã, Tarde, Noite
+    }
 
     @PrePersist
     protected void onCreate() {

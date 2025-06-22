@@ -1,6 +1,7 @@
 package com.flordacidade.api.flor_da_cidade_api.service;
 
 import com.flordacidade.api.flor_da_cidade_api.model.CursoModel;
+import com.flordacidade.api.flor_da_cidade_api.model.ResourceNotFoundException;
 import com.flordacidade.api.flor_da_cidade_api.repository.CursoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,7 @@ public class CursoService {
 
         // Se um novo banner for enviado, salva o novo e atualiza o nome do arquivo.
         if (bannerFile != null && !bannerFile.isEmpty()) {
-            // TODO: Implementar lógica para deletar o arquivo de banner antigo para não acumular lixo.
+
             String newFileName = fileStorageService.storeFile(bannerFile);
             existingCurso.setFotoBanner(newFileName);
         }
@@ -68,7 +69,11 @@ public class CursoService {
 
     @Transactional
     public void deletar(Integer id) {
-        // TODO: Implementar lógica para deletar o arquivo de imagem do disco.
-        cursoRepository.deleteById(id);
+        CursoModel cursoParaDeletar = cursoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado com id: " + id));
+
+        fileStorageService.deleteFile(cursoParaDeletar.getFotoBanner());
+
+        cursoRepository.delete(cursoParaDeletar);
     }
 }
