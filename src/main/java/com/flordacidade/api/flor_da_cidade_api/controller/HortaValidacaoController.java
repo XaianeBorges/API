@@ -23,7 +23,7 @@ public class HortaValidacaoController {
     @GetMapping
     public List<HortaValidacao> listarTodas() {
         // Agora o método `listarTodas` existe no serviço e será encontrado
-        return HortaValidacaoService.listarTodas();
+        return HortaValidacaoServiceImpl.listarTodas();
     }
 
     @PostMapping
