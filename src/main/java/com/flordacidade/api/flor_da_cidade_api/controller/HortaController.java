@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Map; // Mantido da Esquerda
 
 @RestController
 @RequestMapping("/api/hortas")
@@ -18,6 +18,7 @@ public class HortaController {
     @Autowired
     private HortaService hortaService;
 
+    // Versão da Esquerda (retorna ResponseEntity)
     @GetMapping
     public ResponseEntity<List<Horta>> listarTodas() {
         List<Horta> hortas = hortaService.listarTodas();
@@ -31,14 +32,14 @@ public class HortaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Endpoint para listar solicitações pendentes formatadas para a tela específica
+    // Endpoint mantido da Esquerda
     @GetMapping("/solicitacoes/pendentes")
     public ResponseEntity<List<Map<String, Object>>> getPendingHortaRequests() {
         List<Map<String, Object>> requests = hortaService.getPendingHortaRequests();
-        return ResponseEntity.ok(requests); // Retorna 200 OK com lista vazia se não houver pendentes
+        return ResponseEntity.ok(requests);
     }
 
-    // Adicionar este endpoint em HortaController.java
+    // Endpoint mantido da Esquerda
     @GetMapping("/status/{status}")
     public ResponseEntity<List<Map<String, Object>>> getHortasByStatus(@PathVariable String status) {
         try {
@@ -52,11 +53,11 @@ public class HortaController {
         }
     }
 
+    // Versão da Esquerda (com campos opcionais e enderecoAlternativo)
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<Horta> criar(
-            // Dados da Horta (campos texto)
             @RequestParam("nomeHorta") String nomeHorta,
-            @RequestParam(value = "funcaoUniEnsino", required = false) String funcaoUniEnsino, // Exemplo de campo opcional
+            @RequestParam(value = "funcaoUniEnsino", required = false) String funcaoUniEnsino,
             @RequestParam(value = "ocupacaoPrincipal", required = false) String ocupacaoPrincipal,
             @RequestParam("endereco") String endereco,
             @RequestParam(value = "enderecoAlternativo", required = false) String enderecoAlternativo,
@@ -65,13 +66,11 @@ public class HortaController {
             @RequestParam("qntPessoas") Integer qntPessoas,
             @RequestParam("atividadeDescricao") String atividadeDescricao,
             @RequestParam(value = "parceria", required = false) String parceria,
-            // IDs das entidades relacionadas
             @RequestParam("idUsuario") Integer idUsuario,
             @RequestParam("idUnidadeEnsino") Integer idUnidadeEnsino,
             @RequestParam("idAreaClassificacao") Integer idAreaClassificacao,
             @RequestParam("idAtividadesProdutivas") Integer idAtividadesProdutivas,
             @RequestParam("idTipoDeHorta") Integer idTipoDeHorta,
-            // Arquivo de imagem
             @RequestParam("imagem") MultipartFile imagem) {
 
         Horta novaHorta = new Horta();
@@ -79,33 +78,67 @@ public class HortaController {
         novaHorta.setFuncaoUniEnsino(funcaoUniEnsino);
         novaHorta.setOcupacaoPrincipal(ocupacaoPrincipal);
         novaHorta.setEndereco(endereco);
-        novaHorta.setEnderecoAlternativo(enderecoAlternativo); // Adicionado
+        novaHorta.setEnderecoAlternativo(enderecoAlternativo);
         novaHorta.setTamanhoAreaProducao(tamanhoAreaProducao);
         novaHorta.setCaracteristicaGrupo(caracteristicaGrupo);
         novaHorta.setQntPessoas(qntPessoas);
         novaHorta.setAtividadeDescricao(atividadeDescricao);
         novaHorta.setParceria(parceria);
-        // O statusHorta e imagemCaminho serão definidos no service
 
         Horta hortaSalva = hortaService.salvar(novaHorta, imagem, idUsuario, idUnidadeEnsino, idAreaClassificacao,
                 idAtividadesProdutivas, idTipoDeHorta);
         return ResponseEntity.status(HttpStatus.CREATED).body(hortaSalva);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Horta> atualizar(@PathVariable Integer id, @RequestBody Horta horta) {
-        // Nota: O @RequestBody Horta aqui espera um JSON com a estrutura da entidade Horta.
-        // Se for para atualizar a imagem também, geralmente se faz um endpoint separado ou multipart/form-data.
-        // O método de serviço atualizado lida com atualizações parciais dos campos e relações.
-        Horta atualizada = hortaService.atualizar(id, horta);
-        return ResponseEntity.ok(atualizada);
+    // Versão da Direita (adaptada e completada) para multipart/form-data e compatibilidade com o service
+    @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
+    public ResponseEntity<Horta> atualizar(
+            @PathVariable Integer id,
+            // Dados da horta (tornando opcionais, já que é uma atualização/PATCH-like)
+            @RequestParam(value = "nomeHorta", required = false) String nomeHorta,
+            @RequestParam(value = "funcaoUniEnsino", required = false) String funcaoUniEnsino,
+            @RequestParam(value = "ocupacaoPrincipal", required = false) String ocupacaoPrincipal,
+            @RequestParam(value = "endereco", required = false) String endereco,
+            @RequestParam(value = "enderecoAlternativo", required = false) String enderecoAlternativo,
+            @RequestParam(value = "tamanhoAreaProducao", required = false) Float tamanhoAreaProducao,
+            @RequestParam(value = "caracteristicaGrupo", required = false) String caracteristicaGrupo,
+            @RequestParam(value = "qntPessoas", required = false) Integer qntPessoas,
+            @RequestParam(value = "atividadeDescricao", required = false) String atividadeDescricao,
+            @RequestParam(value = "parceria", required = false) String parceria,
+            @RequestParam(value = "statusHorta", required = false) Horta.StatusHorta statusHorta, // Se permitir atualização de status aqui também
+            // IDs das entidades relacionadas (opcionais na atualização)
+            @RequestParam(value = "idUsuario", required = false) Integer idUsuario,
+            @RequestParam(value = "idUnidadeEnsino", required = false) Integer idUnidadeEnsino,
+            @RequestParam(value = "idAreaClassificacao", required = false) Integer idAreaClassificacao,
+            @RequestParam(value = "idAtividadesProdutivas", required = false) Integer idAtividadesProdutivas,
+            @RequestParam(value = "idTipoDeHorta", required = false) Integer idTipoDeHorta,
+            // O arquivo de imagem é opcional na atualização
+            @RequestParam(value = "imagem", required = false) MultipartFile imagem) {
+
+        Horta dadosParciais = new Horta();
+        // Seta apenas os campos que foram fornecidos (não nulos)
+        if (nomeHorta != null) dadosParciais.setNomeHorta(nomeHorta);
+        if (funcaoUniEnsino != null) dadosParciais.setFuncaoUniEnsino(funcaoUniEnsino);
+        if (ocupacaoPrincipal != null) dadosParciais.setOcupacaoPrincipal(ocupacaoPrincipal);
+        if (endereco != null) dadosParciais.setEndereco(endereco);
+        if (enderecoAlternativo != null) dadosParciais.setEnderecoAlternativo(enderecoAlternativo);
+        if (tamanhoAreaProducao != null) dadosParciais.setTamanhoAreaProducao(tamanhoAreaProducao);
+        if (caracteristicaGrupo != null) dadosParciais.setCaracteristicaGrupo(caracteristicaGrupo);
+        if (qntPessoas != null) dadosParciais.setQntPessoas(qntPessoas);
+        if (atividadeDescricao != null) dadosParciais.setAtividadeDescricao(atividadeDescricao);
+        if (parceria != null) dadosParciais.setParceria(parceria);
+        if (statusHorta != null) dadosParciais.setStatusHorta(statusHorta); // Se o status for atualizável aqui
+
+        // A imagem e os IDs são passados diretamente para o serviço
+        Horta hortaAtualizada = hortaService.atualizar(id, dadosParciais, imagem, idUsuario, idUnidadeEnsino,
+                idAreaClassificacao, idAtividadesProdutivas, idTipoDeHorta);
+
+        return ResponseEntity.ok(hortaAtualizada);
     }
 
+    // Versão da Esquerda (mais explícita)
     @PatchMapping("/{id}/status")
     public ResponseEntity<Horta> alterarStatus(@PathVariable Integer id, @RequestParam("status") Horta.StatusHorta status) {
-        // Nota: @RequestParam espera o valor do status como um parâmetro de requisição.
-        // Ex: /api/hortas/1/status?status=ATIVA
-        // Spring converterá a String "ATIVA" para o enum Horta.StatusHorta.ATIVA
         Horta horta = hortaService.alterarStatus(id, status);
         return ResponseEntity.ok(horta);
     }
