@@ -16,6 +16,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CursoService {
 
+    private static final String PLACEHOLDER_BANNER_FILENAME = "folhin.png";
+
     private final CursoRepository cursoRepository;
     private final FileStorageService fileStorageService;
 
@@ -30,8 +32,11 @@ public class CursoService {
     @Transactional
     public CursoModel salvar(CursoModel curso, MultipartFile bannerFile) {
         if (bannerFile != null && !bannerFile.isEmpty()) {
-            String fileName = fileStorageService.storeFile(bannerFile);
+            String fileName = fileStorageService.storeBannerImage(bannerFile);
             curso.setFotoBanner(fileName);
+        } else {
+            // Se nenhum banner for fornecido, usa o placeholder
+            curso.setFotoBanner(PLACEHOLDER_BANNER_FILENAME);
         }
         return cursoRepository.save(curso);
     }
@@ -41,16 +46,17 @@ public class CursoService {
         CursoModel existingCurso = cursoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Curso não encontrado com o id: " + id));
 
-        // Se um novo banner for enviado, salva o novo e atualiza o nome do arquivo.
+        String bannerAntigo = existingCurso.getFotoBanner();
+
         if (bannerFile != null && !bannerFile.isEmpty()) {
 
             String newFileName = fileStorageService.storeFile(bannerFile);
             existingCurso.setFotoBanner(newFileName);
         }
-
-        // Atualiza todos os campos do curso existente com os detalhes recebidos.
+        
+        // Atualiza todos os outros campos do curso
         existingCurso.setNome(cursoDetails.getNome());
-        existingCurso.setTipoAtividade(cursoDetails.getTipoAtividade());
+        existingCurso.setTipoAtividade(cursoDetails.getTipoAtividade()); // Verifique se este é o getter correto
         existingCurso.setDescricao(cursoDetails.getDescricao());
         existingCurso.setLocal(cursoDetails.getLocal());
         existingCurso.setInstituicao(cursoDetails.getInstituicao());

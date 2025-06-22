@@ -21,25 +21,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable) // Desabilita CSRF, comum para APIs stateless com tokens
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        // Endpoints públicos existentes
                         .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
                         .requestMatchers("/api/tecnicos/**").permitAll()
                         .requestMatchers("/api/cursos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/hortas/solicitacoes/pendentes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/hortas/status/**").permitAll()
                         .requestMatchers("/uploads/banners/**").permitAll()
-
-                        // --- PERMISSÃO TEMPORÁRIA PARA DESENVOLVIMENTO ---
-                        // Permite o método PATCH para o endpoint de alteração de status de hortas
-                        // sem autenticação. REMOVA OU PROTEJA ADEQUADAMENTE PARA PRODUÇÃO.
-                        .requestMatchers(HttpMethod.PATCH, "/api/hortas/{id}/status").permitAll()
-                        // Se você tiver outros endpoints PATCH ou POST para /api/hortas que também
-                        // precisam ser testados sem token agora, adicione-os aqui temporariamente.
-                        // Ex: .requestMatchers(HttpMethod.POST, "/api/hortas").permitAll()
-
-                        // Todas as outras requisições não listadas acima exigirão autenticação
+                        .requestMatchers("/uploads/imagem/**").permitAll() // Adicionado para imagens de hortas
+                        .requestMatchers(HttpMethod.PATCH, "/api/hortas/{id}/status").permitAll() // Manter se ainda necessário para desenvolvimento
                         .anyRequest().authenticated()
                 );
         return http.build();
@@ -48,20 +39,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // URLs permitidas para o frontend
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173", // Web Emprel (se existir)
-                "http://localhost:5175"  // Web Admin
+                "http://localhost:5173",
+                "http://localhost:5175"
         ));
-        // Métodos HTTP permitidos
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        // Cabeçalhos permitidos (usar "*" é amplo, mas comum para desenvolvimento)
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        // Permitir credenciais (cookies, authorization headers)
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Aplica esta configuração CORS para todas as rotas da API (/**)
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
