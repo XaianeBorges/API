@@ -97,10 +97,28 @@ public class HortaService {
     }
 
     @Transactional // Garante que todas as operações de banco aconteçam em uma única transação
-    public Horta atualizar(Integer id, Horta hortaAtualizada) {
+    public Horta atualizar(Integer id, Horta hortaAtualizada, MultipartFile novaImagem, Integer idUsuario,
+            Integer idUnidadeEnsino, Integer idAreaClassificacao, Integer idAtividadesProdutivas,
+            Integer idTipoDeHorta) {
         // 1. Busca a horta existente no banco. Se não encontrar, lança a exceção.
         Horta hortaExistente = hortaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada com id: " + id));
+
+        // Guarda o nome da imagem antiga para possível exclusão
+        String imagemAntiga = hortaExistente.getImagemCaminho();
+
+        // 2. Lógica de atualização da imagem
+        if (novaImagem != null && !novaImagem.isEmpty()) {
+            // Se uma nova imagem foi enviada, deleta a antiga (se existir)
+            if (imagemAntiga != null && !imagemAntiga.isBlank()) {
+                fileStorageService.deleteFile(imagemAntiga);
+            }
+            // Salva a nova imagem e atualiza o caminho no objeto
+            String nomeNovaImagem = fileStorageService.storeFile(novaImagem);
+            hortaExistente.setImagemCaminho(nomeNovaImagem);
+        }
+        // Se nenhuma nova imagem for enviada, o campo `imagemCaminho` da hortaExistente
+        // permanece intacto.
 
         // 2. Atualiza os campos simples (Strings, números, etc)
         // Adicionei verificações de nulidade para permitir atualizações parciais
@@ -187,11 +205,15 @@ public class HortaService {
         return hortaRepository.save(hortaExistente);
     }
 
+    @Transactional
     public void deletar(Integer id) {
-        if (!hortaRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Horta não encontrada com id: " + id);
-        }
-        hortaRepository.deleteById(id);
+
+        Horta hortaParaDeletar = hortaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada com id: " + id));
+
+        fileStorageService.deleteFile(hortaParaDeletar.getImagemCaminho());
+
+        hortaRepository.delete(hortaParaDeletar);
     }
 
     public Horta alterarStatus(Integer id, Horta.StatusHorta status) {

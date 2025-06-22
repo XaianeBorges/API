@@ -47,5 +47,22 @@ public class FileStorageService {
         } catch (IOException ex) {
             throw new RuntimeException("Não foi possível armazenar o arquivo " + newFileName, ex);
         }
+
+    }
+
+    public void deleteFile(String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            return; // Não faz nada se o nome do arquivo for nulo ou vazio
+        }
+
+        try {
+            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            Files.deleteIfExists(filePath);
+        } catch (IOException ex) {
+            // Logar o erro é uma boa prática, mas não lançar uma exceção que pare a
+            // operação
+            System.err.println("Não foi possível deletar o arquivo: " + fileName + " " + ex.getMessage());
+        }
+
     }
 }

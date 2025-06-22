@@ -21,5 +21,12 @@ public class WebConfig implements WebMvcConfigurer {
                 // O "file:" indica que é um caminho no sistema de arquivos.
                 // O "/" no final de uploadDir + "/" garante que é um diretório.
                 .addResourceLocations("file:" + uploadDir + "/");
+
+        registry.addResourceHandler("/uploads/imagem/**")
+                // Sirva os arquivos da pasta definida em 'uploadDir'.
+                // O "file:" indica que é um caminho no sistema de arquivos.
+                // O "/" no final de uploadDir + "/" garante que é um diretório.
+                .addResourceLocations("file:" + uploadDir + "/");
+
     }
 }

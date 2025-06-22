@@ -63,11 +63,34 @@ public class HortaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(hortaSalva);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Horta> atualizar(@PathVariable Integer id, @RequestBody Horta horta) {
+    @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
+    public ResponseEntity<Horta> atualizar(
+            @PathVariable Integer id,
+            // Dados da horta
+            @RequestParam("nomeHorta") String nomeHorta,
+            @RequestParam("funcaoUniEnsino") String funcaoUniEnsino,
+            // Adicione todos os outros campos de Horta como @RequestParam
+            // ...
+            @RequestParam("tamanhoAreaProducao") Float tamanhoAreaProducao,
+            // IDs das entidades relacionadas (tornando-os opcionais na atualização)
+            @RequestParam(value = "idUsuario", required = false) Integer idUsuario,
+            @RequestParam(value = "idUnidadeEnsino", required = false) Integer idUnidadeEnsino,
+            @RequestParam(value = "idAreaClassificacao", required = false) Integer idAreaClassificacao,
+            @RequestParam(value = "idAtividadesProdutivas", required = false) Integer idAtividadesProdutivas,
+            @RequestParam(value = "idTipoDeHorta", required = false) Integer idTipoDeHorta,
+            // O arquivo de imagem é opcional na atualização
+            @RequestParam(value = "imagem", required = false) MultipartFile imagem) {
+        // Monta um objeto Horta com os dados recebidos para passar ao serviço
+        Horta dadosParciais = new Horta();
+        dadosParciais.setNomeHorta(nomeHorta);
+        dadosParciais.setFuncaoUniEnsino(funcaoUniEnsino);
+        dadosParciais.setTamanhoAreaProducao(tamanhoAreaProducao);
+        // ... set para todos os outros campos
 
-        Horta atualizada = hortaService.atualizar(id, horta);
-        return ResponseEntity.ok(atualizada);
+        Horta hortaAtualizada = hortaService.atualizar(id, dadosParciais, imagem, idUsuario, idUnidadeEnsino,
+                idAreaClassificacao, idAtividadesProdutivas, idTipoDeHorta);
+
+        return ResponseEntity.ok(hortaAtualizada);
     }
 
     @DeleteMapping("/{id}")
