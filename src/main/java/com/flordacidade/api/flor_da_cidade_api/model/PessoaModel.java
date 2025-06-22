@@ -10,11 +10,10 @@ import java.time.LocalDate;
 @Data
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @Table(name = "pessoa", uniqueConstraints = {
-                @UniqueConstraint(columnNames = "cpf"),
-                @UniqueConstraint(columnNames = "email"),
-                @UniqueConstraint(columnNames = "telefone")
+        @UniqueConstraint(columnNames = "cpf"),
+        @UniqueConstraint(columnNames = "email"),
+        @UniqueConstraint(columnNames = "telefone")
 })
-
 public class PessoaModel {
 
     public enum Escolaridade {
@@ -24,9 +23,9 @@ public class PessoaModel {
         MEDIO_COMPLETO,
         SUPERIOR_INCOMPLETO,
         SUPERIOR_COMPLETO,
-        POS_GRADUACAO
-        }
-    // --- FIM DA CORREÇÃO ---
+        POS_GRADUACAO,
+        SEM_ESCOLARIDADE // <<--- ADICIONE ESTA CONSTANTE
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,7 +50,6 @@ public class PessoaModel {
     private String telefone;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 50) // Verifique se length=50 é suficiente para "FUNDAMENTAL_INCOMPLETO" ou outros. "SEM_ESCOLARIDADE" cabe.
     private Escolaridade escolaridade;
-    
 }
