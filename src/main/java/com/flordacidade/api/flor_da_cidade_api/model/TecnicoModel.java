@@ -43,7 +43,7 @@ public class TecnicoModel {
     private LocalDateTime dataAtualizacao;
 
     @Column(name = "senha", nullable = false)
-    private String senha;
+    private String senha; // Lembre-se de NUNCA retornar a senha em GETs. Considere @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 
     @Column(name = "nome", nullable = false, length = 45)
     private String nome;
@@ -51,4 +51,8 @@ public class TecnicoModel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "regiao_id", nullable = false)
     private RegiaoModel regiao;
+
+    // NOVO CAMPO ADICIONADO
+    @Column(name = "is_adm", nullable = false)
+    private boolean isAdm = false; // Mapeia para BOOLEAN ou TINYINT(1) no DB
 }

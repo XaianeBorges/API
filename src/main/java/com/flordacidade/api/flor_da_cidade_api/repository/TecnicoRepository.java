@@ -9,5 +9,9 @@ import java.util.Optional;
 @Repository
 public interface TecnicoRepository extends JpaRepository<TecnicoModel, Integer> {
 
+    // Usado pelo seu AuthController atual
     Optional<TecnicoModel> findByMatriculaAndSenha(String matricula, String senha);
+
+    // Necessário se você fosse implementar hashing de senha no futuro
+    Optional<TecnicoModel> findByMatricula(String matricula);
 }
