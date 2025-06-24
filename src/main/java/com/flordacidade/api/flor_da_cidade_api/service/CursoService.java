@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor // Lombok anotation para injeção de dependência via construtor para campos final
 public class CursoService {
 
     private static final String PLACEHOLDER_BANNER_FILENAME = "folhin.png";
@@ -32,12 +32,14 @@ public class CursoService {
     @Transactional
     public CursoModel salvar(CursoModel curso, MultipartFile bannerFile) {
         if (bannerFile != null && !bannerFile.isEmpty()) {
+            // Usa o método específico para salvar banners
             String fileName = fileStorageService.storeBannerImage(bannerFile);
             curso.setFotoBanner(fileName);
         } else {
             // Se nenhum banner for fornecido, usa o placeholder
             curso.setFotoBanner(PLACEHOLDER_BANNER_FILENAME);
         }
+        // As datas de criação e atualização são gerenciadas por @PrePersist e @PreUpdate em CursoModel
         return cursoRepository.save(curso);
     }
 
@@ -46,17 +48,24 @@ public class CursoService {
         CursoModel existingCurso = cursoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Curso não encontrado com o id: " + id));
 
-        String bannerAntigo = existingCurso.getFotoBanner();
+        String bannerAntigo = existingCurso.getFotoBanner(); // Guarda o nome do banner antigo
 
         if (bannerFile != null && !bannerFile.isEmpty()) {
-
-            String newFileName = fileStorageService.storeFile(bannerFile);
+            // CORREÇÃO: Usa o método específico para salvar banners
+            String newFileName = fileStorageService.storeBannerImage(bannerFile);
             existingCurso.setFotoBanner(newFileName);
+
+            // Deleta o banner antigo se ele existir, não for o placeholder e for diferente do novo
+            if (bannerAntigo != null &&
+                    !bannerAntigo.equals(PLACEHOLDER_BANNER_FILENAME) &&
+                    !bannerAntigo.equals(newFileName)) {
+                fileStorageService.deleteBannerImage(bannerAntigo);
+            }
         }
-        
+
         // Atualiza todos os outros campos do curso
         existingCurso.setNome(cursoDetails.getNome());
-        existingCurso.setTipoAtividade(cursoDetails.getTipoAtividade()); // Verifique se este é o getter correto
+        existingCurso.setTipoAtividade(cursoDetails.getTipoAtividade());
         existingCurso.setDescricao(cursoDetails.getDescricao());
         existingCurso.setLocal(cursoDetails.getLocal());
         existingCurso.setInstituicao(cursoDetails.getInstituicao());
@@ -69,6 +78,7 @@ public class CursoService {
         existingCurso.setMaxPessoas(cursoDetails.getMaxPessoas());
         existingCurso.setCargaHoraria(cursoDetails.getCargaHoraria());
         existingCurso.setAtivo(cursoDetails.getAtivo());
+        // A data de atualização é gerenciada por @PreUpdate em CursoModel
 
         return cursoRepository.save(existingCurso);
     }
@@ -78,7 +88,11 @@ public class CursoService {
         CursoModel cursoParaDeletar = cursoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado com id: " + id));
 
-        fileStorageService.deleteFile(cursoParaDeletar.getFotoBanner());
+        // Deleta o banner associado, a menos que seja o placeholder
+        if (cursoParaDeletar.getFotoBanner() != null &&
+                !cursoParaDeletar.getFotoBanner().equals(PLACEHOLDER_BANNER_FILENAME)) {
+            fileStorageService.deleteBannerImage(cursoParaDeletar.getFotoBanner());
+        }
 
         cursoRepository.delete(cursoParaDeletar);
     }

@@ -1,3 +1,5 @@
+// Caminho do Arquivo: src/main/java/com/flordacidade/api/flor_da_cidade_api/config/SecurityConfig.java
+
 package com.flordacidade.api.flor_da_cidade_api.config;
 
 import org.springframework.context.annotation.Bean;
@@ -24,15 +26,37 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
+
                         .requestMatchers("/api/tecnicos/**").permitAll()
                         .requestMatchers("/api/cursos/**").permitAll()
+
+                        // --- ENDPOINTS PÚBLICOS DE HORTAS ---
+                        .requestMatchers(HttpMethod.GET, "/api/hortas/public/ativas").permitAll() // ADICIONADO
+                        .requestMatchers(HttpMethod.GET, "/api/hortas/{id}").permitAll()
+
+                        // --- ENDPOINTS INTERNOS/ADMIN DE HORTAS ---
                         .requestMatchers(HttpMethod.GET, "/api/hortas/solicitacoes/pendentes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/hortas/status/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/hortas/{id}/status").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/hortas/{id}").permitAll()
+
+                        // Endpoints GET para popular dropdowns
+                        .requestMatchers(HttpMethod.GET, "/api/hortas/tipo").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/hortas/unidade-ensino").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/hortas/areas-classificacao").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/hortas/atividades-produtivas").permitAll()
+
+                        // Endpoints de upload
                         .requestMatchers("/uploads/banners/**").permitAll()
-                        .requestMatchers("/uploads/imagem/**").permitAll() // Adicionado para imagens de hortas
-                        .requestMatchers(HttpMethod.PATCH, "/api/hortas/{id}/status").permitAll() // Manter se ainda necessário para desenvolvimento
-                        .anyRequest().authenticated()
+                        .requestMatchers("/uploads/imagem/**").permitAll()
+
+                        // Outras rotas da API devem ser autenticadas (para o futuro)
+                        .requestMatchers("/api/**").authenticated()
+
+                        .anyRequest().permitAll()
                 );
+
         return http.build();
     }
 
@@ -40,8 +64,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",
-                "http://localhost:5175"
+                "http://localhost:5173", // Frontend Emprel
+                "http://localhost:5175",  // Frontend Admin
+                "http://localhost:5174"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));

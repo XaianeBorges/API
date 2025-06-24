@@ -3,19 +3,30 @@ package com.flordacidade.api.flor_da_cidade_api.repository;
 import com.flordacidade.api.flor_da_cidade_api.model.Horta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param; // Certifique-se que este import está presente
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List; // Certifique-se que este import está presente
+import java.util.List;
+import java.util.Optional; // Adicionar este import
 
 @Repository
 public interface HortaRepository extends JpaRepository<Horta, Integer> {
 
     @Query("SELECT h FROM Horta h " +
-            "JOIN FETCH h.tipoDeHorta th " +   // Alias 'th' para tipoDeHorta
-            "JOIN FETCH h.usuario u " +        // Alias 'u' para usuario
-            "JOIN FETCH u.pessoa p " +         // Alias 'p' para pessoa
+            "JOIN FETCH h.tipoDeHorta th " +
+            "JOIN FETCH h.usuario u " +
+            "JOIN FETCH u.pessoa p " +
             "WHERE h.statusHorta = :status")
     List<Horta> findByStatusHortaFetchingDetails(@Param("status") Horta.StatusHorta status);
 
+    // NOVO MÉTODO para buscar Horta por ID com todos os detalhes necessários para a tela de descrição
+    @Query("SELECT h FROM Horta h " +
+            "LEFT JOIN FETCH h.usuario u " +
+            "LEFT JOIN FETCH u.pessoa p " + // Detalhes da pessoa associada ao usuário
+            "LEFT JOIN FETCH h.tipoDeHorta th " +
+            "LEFT JOIN FETCH h.areaClassificacao ac " +
+            "LEFT JOIN FETCH h.atividadesProdutivas ap " +
+            "LEFT JOIN FETCH h.unidadeDeEnsino ue " + // Detalhes da unidade de ensino
+            "WHERE h.idHorta = :id")
+    Optional<Horta> findByIdFetchingAllDetails(@Param("id") Integer id);
 }

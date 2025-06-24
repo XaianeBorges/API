@@ -1,3 +1,5 @@
+// Caminho do Arquivo: src/main/java/com/flordacidade/api/flor_da_cidade_api/controller/HortaController.java
+
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.model.Horta;
@@ -17,8 +19,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/hortas")
@@ -30,9 +32,19 @@ public class HortaController {
     @Autowired
     private ExcelExportService excelExportService;
 
+    // --- NOVO ENDPOINT ADICIONADO PARA O MAPA PÚBLICO ---
+    @GetMapping("/public/ativas")
+    public ResponseEntity<List<Horta>> getPublicActiveHortas() {
+        List<Horta> hortasAtivas = hortaService.listarAtivasParaMapa();
+        return ResponseEntity.ok(hortasAtivas);
+    }
+    // --- FIM DA ADIÇÃO ---
+
+
     @GetMapping
-    public List<Horta> listarTodas() {
-        return hortaService.listarTodas();
+    public ResponseEntity<List<Horta>> listarTodas() {
+        List<Horta> hortas = hortaService.listarTodas();
+        return ResponseEntity.ok(hortas);
     }
 
     @GetMapping("/{id}")
@@ -42,29 +54,49 @@ public class HortaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/solicitacoes/pendentes")
+    public ResponseEntity<List<Map<String, Object>>> getPendingHortaRequests() {
+        List<Map<String, Object>> requests = hortaService.getPendingHortaRequests();
+        return ResponseEntity.ok(requests);
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<Map<String, Object>>> getHortasByStatus(@PathVariable String status) {
+        try {
+            Horta.StatusHorta statusEnum = Horta.StatusHorta.valueOf(status.toUpperCase());
+            List<Map<String, Object>> hortas = hortaService.getHortasByStatusWithUserDetails(statusEnum);
+            return ResponseEntity.ok(hortas);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Status inválido fornecido para /api/hortas/status: " + status + " - " + e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<Horta> criar(
-
             @RequestParam("nomeHorta") String nomeHorta,
-            @RequestParam("funcaoUniEnsino") String funcaoUniEnsino,
-            @RequestParam("ocupacaoPrincipal") String ocupacaoPrincipal,
+            @RequestParam(value = "funcaoUniEnsino", required = false) String funcaoUniEnsino,
+            @RequestParam(value = "ocupacaoPrincipal", required = false) String ocupacaoPrincipal,
             @RequestParam("endereco") String endereco,
+            @RequestParam(value = "enderecoAlternativo", required = false) String enderecoAlternativo,
             @RequestParam("tamanhoAreaProducao") Float tamanhoAreaProducao,
-            @RequestParam("caracteristicaGrupo") String caracteristicaGrupo,
+            @RequestParam(value = "caracteristicaGrupo", required = false) String caracteristicaGrupo,
             @RequestParam("qntPessoas") Integer qntPessoas,
             @RequestParam("atividadeDescricao") String atividadeDescricao,
-            @RequestParam("parceria") String parceria,
+            @RequestParam(value = "parceria", required = false) String parceria,
             @RequestParam("idUsuario") Integer idUsuario,
             @RequestParam("idUnidadeEnsino") Integer idUnidadeEnsino,
             @RequestParam("idAreaClassificacao") Integer idAreaClassificacao,
             @RequestParam("idAtividadesProdutivas") Integer idAtividadesProdutivas,
             @RequestParam("idTipoDeHorta") Integer idTipoDeHorta,
-            @RequestParam("imagem") MultipartFile imagem) {
+            @RequestParam(value = "imagem", required = false) MultipartFile imagem) {
+
         Horta novaHorta = new Horta();
         novaHorta.setNomeHorta(nomeHorta);
         novaHorta.setFuncaoUniEnsino(funcaoUniEnsino);
         novaHorta.setOcupacaoPrincipal(ocupacaoPrincipal);
         novaHorta.setEndereco(endereco);
+        novaHorta.setEnderecoAlternativo(enderecoAlternativo);
         novaHorta.setTamanhoAreaProducao(tamanhoAreaProducao);
         novaHorta.setCaracteristicaGrupo(caracteristicaGrupo);
         novaHorta.setQntPessoas(qntPessoas);
@@ -79,28 +111,38 @@ public class HortaController {
     @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
     public ResponseEntity<Horta> atualizar(
             @PathVariable Integer id,
-            // Dados da horta
             @RequestParam("nomeHorta") String nomeHorta,
-            @RequestParam("funcaoUniEnsino") String funcaoUniEnsino,
-            // Adicione todos os outros campos de Horta como @RequestParam
-            // ...
-            @RequestParam("tamanhoAreaProducao") Float tamanhoAreaProducao,
-            // IDs das entidades relacionadas (tornando-os opcionais na atualização)
+            @RequestParam(value = "funcaoUniEnsino", required = false) String funcaoUniEnsino,
+            @RequestParam(value = "ocupacaoPrincipal", required = false) String ocupacaoPrincipal,
+            @RequestParam(value = "endereco", required = false) String endereco,
+            @RequestParam(value = "enderecoAlternativo", required = false) String enderecoAlternativo,
+            @RequestParam(value = "tamanhoAreaProducao", required = false) Float tamanhoAreaProducao,
+            @RequestParam(value = "caracteristicaGrupo", required = false) String caracteristicaGrupo,
+            @RequestParam(value = "qntPessoas", required = false) Integer qntPessoas,
+            @RequestParam(value = "atividadeDescricao", required = false) String atividadeDescricao,
+            @RequestParam(value = "parceria", required = false) String parceria,
+            @RequestParam(value = "statusHorta", required = false) Horta.StatusHorta statusHorta,
             @RequestParam(value = "idUsuario", required = false) Integer idUsuario,
             @RequestParam(value = "idUnidadeEnsino", required = false) Integer idUnidadeEnsino,
             @RequestParam(value = "idAreaClassificacao", required = false) Integer idAreaClassificacao,
             @RequestParam(value = "idAtividadesProdutivas", required = false) Integer idAtividadesProdutivas,
             @RequestParam(value = "idTipoDeHorta", required = false) Integer idTipoDeHorta,
-            // O arquivo de imagem é opcional na atualização
             @RequestParam(value = "imagem", required = false) MultipartFile imagem) {
-        // Monta um objeto Horta com os dados recebidos para passar ao serviço
-        Horta dadosParciais = new Horta();
-        dadosParciais.setNomeHorta(nomeHorta);
-        dadosParciais.setFuncaoUniEnsino(funcaoUniEnsino);
-        dadosParciais.setTamanhoAreaProducao(tamanhoAreaProducao);
-        // ... set para todos os outros campos
 
-        Horta hortaAtualizada = hortaService.atualizar(id, dadosParciais, imagem, idUsuario, idUnidadeEnsino,
+        Horta dadosParaAtualizar = new Horta();
+        dadosParaAtualizar.setNomeHorta(nomeHorta);
+        if (funcaoUniEnsino != null) dadosParaAtualizar.setFuncaoUniEnsino(funcaoUniEnsino);
+        if (ocupacaoPrincipal != null) dadosParaAtualizar.setOcupacaoPrincipal(ocupacaoPrincipal);
+        if (endereco != null) dadosParaAtualizar.setEndereco(endereco);
+        if (enderecoAlternativo != null) dadosParaAtualizar.setEnderecoAlternativo(enderecoAlternativo);
+        if (tamanhoAreaProducao != null) dadosParaAtualizar.setTamanhoAreaProducao(tamanhoAreaProducao);
+        if (caracteristicaGrupo != null) dadosParaAtualizar.setCaracteristicaGrupo(caracteristicaGrupo);
+        if (qntPessoas != null) dadosParaAtualizar.setQntPessoas(qntPessoas);
+        if (atividadeDescricao != null) dadosParaAtualizar.setAtividadeDescricao(atividadeDescricao);
+        if (parceria != null) dadosParaAtualizar.setParceria(parceria);
+        if (statusHorta != null) dadosParaAtualizar.setStatusHorta(statusHorta);
+
+        Horta hortaAtualizada = hortaService.atualizar(id, dadosParaAtualizar, imagem, idUsuario, idUnidadeEnsino,
                 idAreaClassificacao, idAtividadesProdutivas, idTipoDeHorta);
 
         return ResponseEntity.ok(hortaAtualizada);
@@ -113,7 +155,7 @@ public class HortaController {
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Horta> alterarStatus(@PathVariable Integer id, @RequestParam Horta.StatusHorta status) {
+    public ResponseEntity<Horta> alterarStatus(@PathVariable Integer id, @RequestParam("status") Horta.StatusHorta status) {
         Horta horta = hortaService.alterarStatus(id, status);
         return ResponseEntity.ok(horta);
     }
@@ -124,16 +166,18 @@ public class HortaController {
         ByteArrayInputStream bais = excelExportService.exportarHortasParaExcel(hortas);
 
         HttpHeaders headers = new HttpHeaders();
-        String timestamp = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
         String filename = "relatorio_hortas_" + timestamp + ".xlsx";
 
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
+        headers.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+        headers.add(HttpHeaders.PRAGMA, "no-cache");
+        headers.add(HttpHeaders.EXPIRES, "0");
 
         return ResponseEntity
                 .ok()
                 .headers(headers)
-                .contentType(
-                        MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(new InputStreamResource(bais));
     }
 }

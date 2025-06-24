@@ -1,4 +1,5 @@
-// src/main/java/com/flordacidade/api/flor_da_cidade_api/model/Usuario.java
+// Caminho do Arquivo: src/main/java/com/flordacidade/api/flor_da_cidade_api/model/UsuarioModel.java
+
 package com.flordacidade.api.flor_da_cidade_api.model;
 
 import jakarta.persistence.*;
@@ -27,7 +28,8 @@ public class UsuarioModel {
     @Column(name = "id_usuario")
     private Integer idUsuario;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    // ALTERAÇÃO APLICADA: Mudança de FetchType.LAZY para FetchType.EAGER
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @JoinColumn(name = "id_pessoa", nullable = false)
     @NotNull
