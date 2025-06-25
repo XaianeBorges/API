@@ -16,16 +16,19 @@ import java.time.LocalDate;
 })
 public class PessoaModel {
 
+    // ======================= INÍCIO DA CORREÇÃO =======================
+    // Alinhando este enum com os valores exatos do ENUM do banco de dados.
     public enum Escolaridade {
-        FUNDAMENTAL_INCOMPLETO,
-        FUNDAMENTAL_COMPLETO,
-        MEDIO_INCOMPLETO,
-        MEDIO_COMPLETO,
-        SUPERIOR_INCOMPLETO,
-        SUPERIOR_COMPLETO,
-        POS_GRADUACAO,
-        SEM_ESCOLARIDADE // <<--- ADICIONE ESTA CONSTANTE
+        SEM_ESCOLARIDADE,
+        ENSINO_FUNDAMENTAL_COMPLETO,
+        ENSINO_FUNDAMENTAL_INCOMPLETO,
+        ENSINO_MEDIO_COMPLETO,
+        ENSINO_MEDIO_INCOMPLETO,
+        ENSINO_SUPERIOR_COMPLETO,
+        ENSINO_SUPERIOR_INCOMPLETO,
+        POS_GRADUACAO
     }
+    // ======================== FIM DA CORREÇÃO =========================
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,6 +53,6 @@ public class PessoaModel {
     private String telefone;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50) // Verifique se length=50 é suficiente para "FUNDAMENTAL_INCOMPLETO" ou outros. "SEM_ESCOLARIDADE" cabe.
+    @Column(nullable = false) // O length não é mais estritamente necessário aqui, mas não prejudica
     private Escolaridade escolaridade;
 }
