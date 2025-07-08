@@ -12,7 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,7 +28,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -57,13 +57,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/logout").permitAll()
-                        
+
                         .requestMatchers("/uploads/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/hortas/public/ativas").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/regioes").permitAll()
                         .requestMatchers("/api/cursos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/hortas/**").permitAll() // Simplificado para permitir todos os GETs de horta
+                        .requestMatchers(HttpMethod.GET, "/api/hortas/**").permitAll() // Simplificado para permitir
+                                                                                       // todos os GETs de horta
 
                         // ======================= INÍCIO DA ALTERAÇÃO =======================
                         // Permissões para fluxos de criação pública
@@ -75,7 +76,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll());
-                        
+
         return http.build();
     }
 

@@ -53,4 +53,11 @@ public class UsuarioModel {
 
     @Column(name = "matricula")
     private String matricula;
+
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
+    @Column(name = "reset_password_token_expiry")
+    private LocalDateTime resetPasswordTokenExpiry;
+
 }

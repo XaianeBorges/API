@@ -2,7 +2,7 @@ package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.model.CursoModel;
 import com.flordacidade.api.flor_da_cidade_api.service.CursoService;
-import com.flordacidade.api.flor_da_cidade_api.service.ExcelExportService;
+import com.flordacidade.api.flor_da_cidade_api.service.ExcelService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,7 +32,7 @@ public class CursoController {
     @Autowired
     private CursoService cursoService;
     @Autowired
-    private ExcelExportService excelExportService;
+    private ExcelService excelExportService;
 
     @GetMapping("/opcoes")
     public ResponseEntity<Map<String, List<String>>> getFormOptions() {

@@ -15,7 +15,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
-public class FileStorageService {
+public class ArquivoService {
 
     // ADICIONAR A CONSTANTE AQUI
     private static final String PLACEHOLDER_BANNER_FILENAME = "folhin.png";
@@ -26,7 +26,7 @@ public class FileStorageService {
     private Path hortaImageStorageLocation;
     private Path bannerStorageLocation;
 
-    public FileStorageService(
+    public ArquivoService(
             @Value("${file.upload-dir.hortas}") String hortaImageUploadDir,
             @Value("${file.upload-dir.banners}") String bannerUploadDir) {
         this.hortaImageUploadDir = hortaImageUploadDir;
@@ -81,7 +81,8 @@ public class FileStorageService {
             Path filePath = storageLocation.resolve(fileName).normalize();
             Files.deleteIfExists(filePath);
         } catch (IOException ex) {
-            System.err.println("Não foi possível deletar o arquivo: " + fileName + " de " + storageLocation.toString() + " - " + ex.getMessage());
+            System.err.println("Não foi possível deletar o arquivo: " + fileName + " de " + storageLocation.toString()
+                    + " - " + ex.getMessage());
         }
     }
 
@@ -104,13 +105,15 @@ public class FileStorageService {
 
     @Deprecated
     public String storeFile(MultipartFile file) {
-        System.out.println("WARN: O método storeFile() está obsoleto. Usando storeHortaImage() como padrão para compatibilidade.");
+        System.out.println(
+                "WARN: O método storeFile() está obsoleto. Usando storeHortaImage() como padrão para compatibilidade.");
         return storeHortaImage(file);
     }
 
     @Deprecated
     public void deleteFile(String fileName) {
-        System.out.println("WARN: O método deleteFile() está obsoleto. Tentando deletar como imagem de banner por padrão.");
+        System.out.println(
+                "WARN: O método deleteFile() está obsoleto. Tentando deletar como imagem de banner por padrão.");
         // Usa a constante definida nesta classe
         internalDeleteFile(fileName, this.bannerStorageLocation);
     }

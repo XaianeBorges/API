@@ -3,13 +3,14 @@ package com.flordacidade.api.flor_da_cidade_api.controller;
 import com.flordacidade.api.flor_da_cidade_api.model.InscricaoCursoModel;
 import com.flordacidade.api.flor_da_cidade_api.service.InscricaoCursoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/inscricoes")
+@RequestMapping("/api/curos/inscricoes")
 public class InscricaoCursoController {
 
     @Autowired
@@ -28,8 +29,15 @@ public class InscricaoCursoController {
     }
 
     @PostMapping
-    public ResponseEntity<InscricaoCursoModel> salvar(@RequestBody InscricaoCursoModel inscricao) {
-        return ResponseEntity.ok(service.salvar(inscricao));
+    public ResponseEntity<InscricaoCursoModel> criarInscricao(
+            @RequestParam("idCurso") Integer idCurso,
+            @RequestParam("idUsuario") Integer idUsuario) {
+
+        // Chama o novo método do serviço que contém a lógica de negócio
+        InscricaoCursoModel inscricaoSalva = service.salvarInscricao(idCurso, idUsuario);
+
+        // Retorna 201 Created, que é o status correto para criação de recurso
+        return new ResponseEntity<>(inscricaoSalva, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")

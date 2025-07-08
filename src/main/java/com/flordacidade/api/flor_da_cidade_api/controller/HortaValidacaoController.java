@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/validacoes")
+@RequestMapping("/api/hortas/validacoes")
 @RequiredArgsConstructor
 public class HortaValidacaoController {
 
@@ -18,4 +18,3 @@ public class HortaValidacaoController {
         return ResponseEntity.ok(service.validarHorta(validacao));
     }
 }
-

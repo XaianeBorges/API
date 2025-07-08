@@ -1,7 +1,7 @@
 package com.flordacidade.api.flor_da_cidade_api.service;
 
 import com.flordacidade.api.flor_da_cidade_api.model.CursoModel;
-import com.flordacidade.api.flor_da_cidade_api.model.ResourceNotFoundException;
+import com.flordacidade.api.flor_da_cidade_api.exception.ResourceNotFoundException;
 import com.flordacidade.api.flor_da_cidade_api.repository.CursoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class CursoService {
     private static final String PLACEHOLDER_BANNER_FILENAME = "folhin.png";
 
     private final CursoRepository cursoRepository;
-    private final FileStorageService fileStorageService;
+    private final ArquivoService fileStorageService;
 
     public List<CursoModel> listarTodos() {
         return cursoRepository.findAll();
@@ -39,7 +39,8 @@ public class CursoService {
             // Se nenhum banner for fornecido, usa o placeholder
             curso.setFotoBanner(PLACEHOLDER_BANNER_FILENAME);
         }
-        // As datas de criação e atualização são gerenciadas por @PrePersist e @PreUpdate em CursoModel
+        // As datas de criação e atualização são gerenciadas por @PrePersist e
+        // @PreUpdate em CursoModel
         return cursoRepository.save(curso);
     }
 
@@ -55,7 +56,8 @@ public class CursoService {
             String newFileName = fileStorageService.storeBannerImage(bannerFile);
             existingCurso.setFotoBanner(newFileName);
 
-            // Deleta o banner antigo se ele existir, não for o placeholder e for diferente do novo
+            // Deleta o banner antigo se ele existir, não for o placeholder e for diferente
+            // do novo
             if (bannerAntigo != null &&
                     !bannerAntigo.equals(PLACEHOLDER_BANNER_FILENAME) &&
                     !bannerAntigo.equals(newFileName)) {

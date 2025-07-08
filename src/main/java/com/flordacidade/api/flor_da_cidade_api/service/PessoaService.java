@@ -28,8 +28,23 @@ public class PessoaService {
         return repo.findById(id);
     }
 
+    private String limparNumeros(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        return valor.replaceAll("[^0-9]", ""); // Remove tudo que não for um dígito
+    }
+
     @Transactional
     public PessoaModel criar(PessoaModel p) {
+
+        // Limpa os dados antes da validação de unicidade
+        String cpfLimpo = limparNumeros(p.getCpf());
+        String telefoneLimpo = limparNumeros(p.getTelefone());
+
+        p.setCpf(cpfLimpo);
+        p.setTelefone(telefoneLimpo);
+
         if (repo.existsByCpf(p.getCpf())) {
             throw new IllegalArgumentException("CPF já cadastrado");
         }
@@ -44,6 +59,13 @@ public class PessoaService {
 
     @Transactional
     public PessoaModel atualizar(Integer id, PessoaModel pAtual) {
+
+        String cpfLimpo = limparNumeros(pAtual.getCpf());
+        String telefoneLimpo = limparNumeros(pAtual.getTelefone());
+
+        pAtual.setCpf(cpfLimpo);
+        pAtual.setTelefone(telefoneLimpo);
+
         return repo.findById(id)
                 .map(p -> {
                     if (repo.existsByCpfAndIdPessoaNot(pAtual.getCpf(), id)) {
@@ -71,4 +93,5 @@ public class PessoaService {
     public void excluir(Integer id) {
         repo.deleteById(id);
     }
+
 }

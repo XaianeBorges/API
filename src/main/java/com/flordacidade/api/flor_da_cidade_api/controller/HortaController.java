@@ -3,6 +3,7 @@
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.model.Horta;
+import com.flordacidade.api.flor_da_cidade_api.exception.*;
 import com.flordacidade.api.flor_da_cidade_api.service.HortaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.flordacidade.api.flor_da_cidade_api.service.ExcelExportService;
+import com.flordacidade.api.flor_da_cidade_api.service.PdfService;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import com.flordacidade.api.flor_da_cidade_api.service.ExcelService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -24,13 +29,17 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/hortas")
+@Tag(name = "Hortas", description = "Endpoints para o gerenciamento completo de hortas")
 public class HortaController {
 
     @Autowired
     private HortaService hortaService;
 
     @Autowired
-    private ExcelExportService excelExportService;
+    private ExcelService excelService;
+
+    @Autowired
+    private PdfService pdfService;
 
     // --- NOVO ENDPOINT ADICIONADO PARA O MAPA PÚBLICO ---
     @GetMapping("/public/ativas")
@@ -39,7 +48,6 @@ public class HortaController {
         return ResponseEntity.ok(hortasAtivas);
     }
     // --- FIM DA ADIÇÃO ---
-
 
     @GetMapping
     public ResponseEntity<List<Horta>> listarTodas() {
@@ -131,16 +139,26 @@ public class HortaController {
 
         Horta dadosParaAtualizar = new Horta();
         dadosParaAtualizar.setNomeHorta(nomeHorta);
-        if (funcaoUniEnsino != null) dadosParaAtualizar.setFuncaoUniEnsino(funcaoUniEnsino);
-        if (ocupacaoPrincipal != null) dadosParaAtualizar.setOcupacaoPrincipal(ocupacaoPrincipal);
-        if (endereco != null) dadosParaAtualizar.setEndereco(endereco);
-        if (enderecoAlternativo != null) dadosParaAtualizar.setEnderecoAlternativo(enderecoAlternativo);
-        if (tamanhoAreaProducao != null) dadosParaAtualizar.setTamanhoAreaProducao(tamanhoAreaProducao);
-        if (caracteristicaGrupo != null) dadosParaAtualizar.setCaracteristicaGrupo(caracteristicaGrupo);
-        if (qntPessoas != null) dadosParaAtualizar.setQntPessoas(qntPessoas);
-        if (atividadeDescricao != null) dadosParaAtualizar.setAtividadeDescricao(atividadeDescricao);
-        if (parceria != null) dadosParaAtualizar.setParceria(parceria);
-        if (statusHorta != null) dadosParaAtualizar.setStatusHorta(statusHorta);
+        if (funcaoUniEnsino != null)
+            dadosParaAtualizar.setFuncaoUniEnsino(funcaoUniEnsino);
+        if (ocupacaoPrincipal != null)
+            dadosParaAtualizar.setOcupacaoPrincipal(ocupacaoPrincipal);
+        if (endereco != null)
+            dadosParaAtualizar.setEndereco(endereco);
+        if (enderecoAlternativo != null)
+            dadosParaAtualizar.setEnderecoAlternativo(enderecoAlternativo);
+        if (tamanhoAreaProducao != null)
+            dadosParaAtualizar.setTamanhoAreaProducao(tamanhoAreaProducao);
+        if (caracteristicaGrupo != null)
+            dadosParaAtualizar.setCaracteristicaGrupo(caracteristicaGrupo);
+        if (qntPessoas != null)
+            dadosParaAtualizar.setQntPessoas(qntPessoas);
+        if (atividadeDescricao != null)
+            dadosParaAtualizar.setAtividadeDescricao(atividadeDescricao);
+        if (parceria != null)
+            dadosParaAtualizar.setParceria(parceria);
+        if (statusHorta != null)
+            dadosParaAtualizar.setStatusHorta(statusHorta);
 
         Horta hortaAtualizada = hortaService.atualizar(id, dadosParaAtualizar, imagem, idUsuario, idUnidadeEnsino,
                 idAreaClassificacao, idAtividadesProdutivas, idTipoDeHorta);
@@ -155,7 +173,8 @@ public class HortaController {
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Horta> alterarStatus(@PathVariable Integer id, @RequestParam("status") Horta.StatusHorta status) {
+    public ResponseEntity<Horta> alterarStatus(@PathVariable Integer id,
+            @RequestParam("status") Horta.StatusHorta status) {
         Horta horta = hortaService.alterarStatus(id, status);
         return ResponseEntity.ok(horta);
     }
@@ -163,7 +182,7 @@ public class HortaController {
     @GetMapping("/download")
     public ResponseEntity<InputStreamResource> exportarHortasParaExcel() throws IOException {
         List<Horta> hortas = hortaService.listarTodas();
-        ByteArrayInputStream bais = excelExportService.exportarHortasParaExcel(hortas);
+        ByteArrayInputStream bais = excelService.exportarHortasParaExcel(hortas);
 
         HttpHeaders headers = new HttpHeaders();
         String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
@@ -177,7 +196,31 @@ public class HortaController {
         return ResponseEntity
                 .ok()
                 .headers(headers)
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .contentType(
+                        MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(new InputStreamResource(bais));
+    }
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<InputStreamResource> gerarRelatorioPdf(@PathVariable Integer id) throws IOException {
+        // 1. Busca a horta específica ou retorna 404 Not Found se não existir
+        Horta horta = hortaService.buscarPorId(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada com ID: " + id));
+
+        // 2. Chama o serviço para gerar o PDF em memória
+        ByteArrayInputStream bis = pdfService.gerarPdfHorta(horta);
+
+        // 3. Configura os cabeçalhos da resposta HTTP para o PDF
+        HttpHeaders headers = new HttpHeaders();
+        String filename = "relatorio_horta_" + horta.getIdHorta() + ".pdf";
+
+        // "inline" tenta abrir no navegador, "attachment" força o download
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + filename);
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF) // Define o Content-Type para PDF
+                .body(new InputStreamResource(bis));
     }
 }

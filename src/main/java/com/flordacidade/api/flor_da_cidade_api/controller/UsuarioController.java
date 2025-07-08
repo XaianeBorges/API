@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -51,5 +52,19 @@ public class UsuarioController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Integer id) {
         service.delete(id);
+    }
+
+    @PostMapping("/esqueci-senha")
+    public ResponseEntity<Void> esqueciSenha(@RequestParam("email") String email) {
+        service.solicitarRedefinicaoSenha(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/redefinir-senha")
+    public ResponseEntity<Map<String, String>> redefinirSenha(
+            @RequestParam("token") String token,
+            @RequestParam("novaSenha") String novaSenha) {
+        service.redefinirSenha(token, novaSenha);
+        return ResponseEntity.ok(Map.of("mensagem", "Senha redefinida com sucesso."));
     }
 }

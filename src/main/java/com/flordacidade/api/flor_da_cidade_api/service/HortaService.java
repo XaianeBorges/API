@@ -5,7 +5,7 @@ package com.flordacidade.api.flor_da_cidade_api.service;
 import com.flordacidade.api.flor_da_cidade_api.model.AreaClassificacao;
 import com.flordacidade.api.flor_da_cidade_api.model.AtividadesProdutivas;
 import com.flordacidade.api.flor_da_cidade_api.model.Horta;
-import com.flordacidade.api.flor_da_cidade_api.model.ResourceNotFoundException;
+import com.flordacidade.api.flor_da_cidade_api.exception.ResourceNotFoundException;
 import com.flordacidade.api.flor_da_cidade_api.model.TipoDeHorta;
 import com.flordacidade.api.flor_da_cidade_api.model.UnidadeEnsino;
 import com.flordacidade.api.flor_da_cidade_api.model.UsuarioModel;
@@ -51,7 +51,7 @@ public class HortaService {
     private TipoDeHortaRepository tipoDeHortaRepository;
 
     @Autowired
-    private FileStorageService fileStorageService;
+    private ArquivoService fileStorageService;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -62,7 +62,6 @@ public class HortaService {
         return hortaRepository.findByStatusHortaFetchingDetails(Horta.StatusHorta.ATIVA);
     }
     // --- FIM DA ADIÇÃO ---
-
 
     public List<Horta> listarTodas() {
         return hortaRepository.findAll();
@@ -75,18 +74,22 @@ public class HortaService {
 
     @Transactional
     public Horta salvar(Horta horta, MultipartFile imagem, Integer idUsuario, Integer idUnidadeEnsino,
-                        Integer idAreaClassificacao, Integer idAtividadesProdutivas, Integer idTipoDeHorta) {
+            Integer idAreaClassificacao, Integer idAtividadesProdutivas, Integer idTipoDeHorta) {
 
         UsuarioModel usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + idUsuario));
         UnidadeEnsino unidadeEnsino = unidadeEnsinoRepository.findById(idUnidadeEnsino)
-                .orElseThrow(() -> new ResourceNotFoundException("Unidade de Ensino não encontrada com id: " + idUnidadeEnsino));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Unidade de Ensino não encontrada com id: " + idUnidadeEnsino));
         AreaClassificacao area = areaClassificacaoRepository.findById(idAreaClassificacao)
-                .orElseThrow(() -> new ResourceNotFoundException("Área de Classificação não encontrada com id: " + idAreaClassificacao));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Área de Classificação não encontrada com id: " + idAreaClassificacao));
         AtividadesProdutivas atividade = atividadesProdutivasRepository.findById(idAtividadesProdutivas)
-                .orElseThrow(() -> new ResourceNotFoundException("Atividade Produtiva não encontrada com id: " + idAtividadesProdutivas));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Atividade Produtiva não encontrada com id: " + idAtividadesProdutivas));
         TipoDeHorta tipo = tipoDeHortaRepository.findById(idTipoDeHorta)
-                .orElseThrow(() -> new ResourceNotFoundException("Tipo de Horta não encontrado com id: " + idTipoDeHorta));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Tipo de Horta não encontrado com id: " + idTipoDeHorta));
 
         horta.setUsuario(usuario);
         horta.setUnidadeDeEnsino(unidadeEnsino);
@@ -107,8 +110,8 @@ public class HortaService {
 
     @Transactional
     public Horta atualizar(Integer id, Horta hortaAtualizadaInput, MultipartFile novaImagem, Integer idUsuario,
-                           Integer idUnidadeEnsino, Integer idAreaClassificacao, Integer idAtividadesProdutivas,
-                           Integer idTipoDeHorta) {
+            Integer idUnidadeEnsino, Integer idAreaClassificacao, Integer idAtividadesProdutivas,
+            Integer idTipoDeHorta) {
         Horta hortaExistente = hortaRepository.findByIdFetchingAllDetails(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada com id: " + id));
 
@@ -122,41 +125,57 @@ public class HortaService {
             hortaExistente.setImagemCaminho(nomeNovaImagem);
         }
 
-        if (hortaAtualizadaInput.getNomeHorta() != null) hortaExistente.setNomeHorta(hortaAtualizadaInput.getNomeHorta());
-        if (hortaAtualizadaInput.getFuncaoUniEnsino() != null) hortaExistente.setFuncaoUniEnsino(hortaAtualizadaInput.getFuncaoUniEnsino());
-        if (hortaAtualizadaInput.getStatusHorta() != null) hortaExistente.setStatusHorta(hortaAtualizadaInput.getStatusHorta());
-        if (hortaAtualizadaInput.getOcupacaoPrincipal() != null) hortaExistente.setOcupacaoPrincipal(hortaAtualizadaInput.getOcupacaoPrincipal());
-        if (hortaAtualizadaInput.getEndereco() != null) hortaExistente.setEndereco(hortaAtualizadaInput.getEndereco());
-        if (hortaAtualizadaInput.getEnderecoAlternativo() != null) hortaExistente.setEnderecoAlternativo(hortaAtualizadaInput.getEnderecoAlternativo());
-        if (hortaAtualizadaInput.getTamanhoAreaProducao() != null) hortaExistente.setTamanhoAreaProducao(hortaAtualizadaInput.getTamanhoAreaProducao());
-        if (hortaAtualizadaInput.getCaracteristicaGrupo() != null) hortaExistente.setCaracteristicaGrupo(hortaAtualizadaInput.getCaracteristicaGrupo());
-        if (hortaAtualizadaInput.getQntPessoas() != null) hortaExistente.setQntPessoas(hortaAtualizadaInput.getQntPessoas());
-        if (hortaAtualizadaInput.getAtividadeDescricao() != null) hortaExistente.setAtividadeDescricao(hortaAtualizadaInput.getAtividadeDescricao());
-        if (hortaAtualizadaInput.getParceria() != null) hortaExistente.setParceria(hortaAtualizadaInput.getParceria());
+        if (hortaAtualizadaInput.getNomeHorta() != null)
+            hortaExistente.setNomeHorta(hortaAtualizadaInput.getNomeHorta());
+        if (hortaAtualizadaInput.getFuncaoUniEnsino() != null)
+            hortaExistente.setFuncaoUniEnsino(hortaAtualizadaInput.getFuncaoUniEnsino());
+        if (hortaAtualizadaInput.getStatusHorta() != null)
+            hortaExistente.setStatusHorta(hortaAtualizadaInput.getStatusHorta());
+        if (hortaAtualizadaInput.getOcupacaoPrincipal() != null)
+            hortaExistente.setOcupacaoPrincipal(hortaAtualizadaInput.getOcupacaoPrincipal());
+        if (hortaAtualizadaInput.getEndereco() != null)
+            hortaExistente.setEndereco(hortaAtualizadaInput.getEndereco());
+        if (hortaAtualizadaInput.getEnderecoAlternativo() != null)
+            hortaExistente.setEnderecoAlternativo(hortaAtualizadaInput.getEnderecoAlternativo());
+        if (hortaAtualizadaInput.getTamanhoAreaProducao() != null)
+            hortaExistente.setTamanhoAreaProducao(hortaAtualizadaInput.getTamanhoAreaProducao());
+        if (hortaAtualizadaInput.getCaracteristicaGrupo() != null)
+            hortaExistente.setCaracteristicaGrupo(hortaAtualizadaInput.getCaracteristicaGrupo());
+        if (hortaAtualizadaInput.getQntPessoas() != null)
+            hortaExistente.setQntPessoas(hortaAtualizadaInput.getQntPessoas());
+        if (hortaAtualizadaInput.getAtividadeDescricao() != null)
+            hortaExistente.setAtividadeDescricao(hortaAtualizadaInput.getAtividadeDescricao());
+        if (hortaAtualizadaInput.getParceria() != null)
+            hortaExistente.setParceria(hortaAtualizadaInput.getParceria());
 
         if (idUsuario != null) {
             UsuarioModel usuario = usuarioRepository.findById(idUsuario)
-                    .orElseThrow(() -> new ResourceNotFoundException("Usuário de referência não encontrado com id: " + idUsuario));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Usuário de referência não encontrado com id: " + idUsuario));
             hortaExistente.setUsuario(usuario);
         }
         if (idUnidadeEnsino != null) {
             UnidadeEnsino unidadeEnsino = unidadeEnsinoRepository.findById(idUnidadeEnsino)
-                    .orElseThrow(() -> new ResourceNotFoundException("Unidade de Ensino não encontrada com id: " + idUnidadeEnsino));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Unidade de Ensino não encontrada com id: " + idUnidadeEnsino));
             hortaExistente.setUnidadeDeEnsino(unidadeEnsino);
         }
         if (idAreaClassificacao != null) {
             AreaClassificacao area = areaClassificacaoRepository.findById(idAreaClassificacao)
-                    .orElseThrow(() -> new ResourceNotFoundException("Área de Classificação não encontrada com id: " + idAreaClassificacao));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Área de Classificação não encontrada com id: " + idAreaClassificacao));
             hortaExistente.setAreaClassificacao(area);
         }
         if (idAtividadesProdutivas != null) {
             AtividadesProdutivas atividade = atividadesProdutivasRepository.findById(idAtividadesProdutivas)
-                    .orElseThrow(() -> new ResourceNotFoundException("Atividade Produtiva não encontrada com id: " + idAtividadesProdutivas));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Atividade Produtiva não encontrada com id: " + idAtividadesProdutivas));
             hortaExistente.setAtividadesProdutivas(atividade);
         }
         if (idTipoDeHorta != null) {
             TipoDeHorta tipo = tipoDeHortaRepository.findById(idTipoDeHorta)
-                    .orElseThrow(() -> new ResourceNotFoundException("Tipo de Horta não encontrado com id: " + idTipoDeHorta));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Tipo de Horta não encontrado com id: " + idTipoDeHorta));
             hortaExistente.setTipoDeHorta(tipo);
         }
 
@@ -171,7 +190,8 @@ public class HortaService {
         String imagemParaDeletar = hortaParaDeletar.getImagemCaminho();
         hortaRepository.delete(hortaParaDeletar);
 
-        if (imagemParaDeletar != null && !imagemParaDeletar.isBlank() && !PLACEHOLDER_IMAGE_FILENAME.equals(imagemParaDeletar)) {
+        if (imagemParaDeletar != null && !imagemParaDeletar.isBlank()
+                && !PLACEHOLDER_IMAGE_FILENAME.equals(imagemParaDeletar)) {
             fileStorageService.deleteHortaImage(imagemParaDeletar);
         }
     }
@@ -199,13 +219,18 @@ public class HortaService {
     private Map<String, Object> mapHortaToPendingRequestDetails(Horta horta) {
         String nomeUsuario = "Usuário Desconhecido";
         if (horta.getUsuario() != null && horta.getUsuario().getPessoa() != null &&
-                horta.getUsuario().getPessoa().getNome() != null && !horta.getUsuario().getPessoa().getNome().trim().isEmpty()) {
+                horta.getUsuario().getPessoa().getNome() != null
+                && !horta.getUsuario().getPessoa().getNome().trim().isEmpty()) {
             nomeUsuario = horta.getUsuario().getPessoa().getNome();
         }
-        String enderecoHorta = horta.getEndereco() != null && !horta.getEndereco().trim().isEmpty() ? horta.getEndereco() : "Endereço não informado";
+        String enderecoHorta = horta.getEndereco() != null && !horta.getEndereco().trim().isEmpty()
+                ? horta.getEndereco()
+                : "Endereço não informado";
         String title = "Request - Horta de " + nomeUsuario + " - " + enderecoHorta;
         String requestDate = horta.getDataCriacao() != null ? horta.getDataCriacao().format(DATE_FORMATTER) : "N/A";
-        String typeName = (horta.getTipoDeHorta() != null && horta.getTipoDeHorta().getNome() != null) ? horta.getTipoDeHorta().getNome() : "Não especificado";
+        String typeName = (horta.getTipoDeHorta() != null && horta.getTipoDeHorta().getNome() != null)
+                ? horta.getTipoDeHorta().getNome()
+                : "Não especificado";
 
         return Map.of(
                 "id", (Object) horta.getIdHorta(),
@@ -217,11 +242,16 @@ public class HortaService {
     private Map<String, Object> mapHortaToUserDetails(Horta horta) {
         String nomeUsuario = "Usuário Desconhecido";
         if (horta.getUsuario() != null && horta.getUsuario().getPessoa() != null &&
-                horta.getUsuario().getPessoa().getNome() != null && !horta.getUsuario().getPessoa().getNome().trim().isEmpty()) {
+                horta.getUsuario().getPessoa().getNome() != null
+                && !horta.getUsuario().getPessoa().getNome().trim().isEmpty()) {
             nomeUsuario = horta.getUsuario().getPessoa().getNome();
         }
-        String enderecoHorta = horta.getEndereco() != null && !horta.getEndereco().trim().isEmpty() ? horta.getEndereco() : "Endereço não informado";
-        String nomeHortaDisplay = horta.getNomeHorta() != null && !horta.getNomeHorta().trim().isEmpty() ? horta.getNomeHorta() : "Horta Sem Nome";
+        String enderecoHorta = horta.getEndereco() != null && !horta.getEndereco().trim().isEmpty()
+                ? horta.getEndereco()
+                : "Endereço não informado";
+        String nomeHortaDisplay = horta.getNomeHorta() != null && !horta.getNomeHorta().trim().isEmpty()
+                ? horta.getNomeHorta()
+                : "Horta Sem Nome";
 
         return Map.of(
                 "id", (Object) horta.getIdHorta(),
@@ -229,7 +259,9 @@ public class HortaService {
                 "endereco", enderecoHorta,
                 "proprietario", nomeUsuario,
                 "status", horta.getStatusHorta().toString(),
-                "tipo", (horta.getTipoDeHorta() != null && horta.getTipoDeHorta().getNome() != null ? horta.getTipoDeHorta().getNome() : "Não especificado")
-        );
+                "tipo",
+                (horta.getTipoDeHorta() != null && horta.getTipoDeHorta().getNome() != null
+                        ? horta.getTipoDeHorta().getNome()
+                        : "Não especificado"));
     }
 }
