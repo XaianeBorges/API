@@ -2,16 +2,15 @@ package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.model.TecnicoModel;
 import com.flordacidade.api.flor_da_cidade_api.service.TecnicoService;
-import jakarta.validation.Valid; // Se você tiver anotações de validação na entidade
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import jakarta.persistence.EntityNotFoundException; // Import para usar no update e delete
-
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tecnicos")
@@ -32,7 +31,8 @@ public class TecnicoController {
     }
 
     @GetMapping("/{id}")
-    // @PreAuthorize("hasAuthority('ROLE_ADMIN') or @customSecurityService.isSelfTecnico(authentication, #id)") // Exemplo
+    // @PreAuthorize("hasAuthority('ROLE_ADMIN') or
+    // @customSecurityService.isSelfTecnico(authentication, #id)") // Exemplo
     public ResponseEntity<TecnicoModel> getById(@PathVariable Integer id) {
         // ALERTA: Retorna a entidade completa, incluindo o campo senha.
         return tecnicoService.getById(id)
@@ -45,7 +45,8 @@ public class TecnicoController {
     public ResponseEntity<TecnicoModel> create(@Valid @RequestBody TecnicoModel tecnico) {
         try {
             TecnicoModel createdTecnico = tecnicoService.create(tecnico);
-            // ALERTA: Retorna a entidade completa, incluindo o campo senha (mesmo que hasheada).
+            // ALERTA: Retorna a entidade completa, incluindo o campo senha (mesmo que
+            // hasheada).
             return ResponseEntity.status(HttpStatus.CREATED).body(createdTecnico);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -53,8 +54,10 @@ public class TecnicoController {
     }
 
     @PutMapping("/{id}")
-    // @PreAuthorize("hasAuthority('ROLE_ADMIN') or @customSecurityService.isSelfTecnico(authentication, #id)")
-    public ResponseEntity<TecnicoModel> update(@PathVariable Integer id, @Valid @RequestBody TecnicoModel tecnicoDetails) {
+    // @PreAuthorize("hasAuthority('ROLE_ADMIN') or
+    // @customSecurityService.isSelfTecnico(authentication, #id)")
+    public ResponseEntity<TecnicoModel> update(@PathVariable Integer id,
+            @Valid @RequestBody TecnicoModel tecnicoDetails) {
         try {
             return tecnicoService.update(id, tecnicoDetails)
                     .map(updatedTecnico -> {
@@ -78,5 +81,19 @@ public class TecnicoController {
         } catch (EntityNotFoundException e) { // Captura EntityNotFoundException do service
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
+    }
+
+    @PostMapping("/esqueci-senha")
+    public ResponseEntity<Void> esqueciSenha(@RequestParam("email") String email) {
+        tecnicoService.solicitarRedefinicaoSenha(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/redefinir-senha")
+    public ResponseEntity<Map<String, String>> redefinirSenha(
+            @RequestParam("token") String token,
+            @RequestParam("novaSenha") String novaSenha) {
+        tecnicoService.redefinirSenha(token, novaSenha);
+        return ResponseEntity.ok(Map.of("mensagem", "Senha redefinida com sucesso."));
     }
 }

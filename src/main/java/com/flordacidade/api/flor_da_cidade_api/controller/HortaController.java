@@ -14,6 +14,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.flordacidade.api.flor_da_cidade_api.service.PdfService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import com.flordacidade.api.flor_da_cidade_api.service.ExcelService;
 import org.springframework.core.io.InputStreamResource;
@@ -41,13 +47,11 @@ public class HortaController {
     @Autowired
     private PdfService pdfService;
 
-    // --- NOVO ENDPOINT ADICIONADO PARA O MAPA PÚBLICO ---
     @GetMapping("/public/ativas")
     public ResponseEntity<List<Horta>> getPublicActiveHortas() {
         List<Horta> hortasAtivas = hortaService.listarAtivasParaMapa();
         return ResponseEntity.ok(hortasAtivas);
     }
-    // --- FIM DA ADIÇÃO ---
 
     @GetMapping
     public ResponseEntity<List<Horta>> listarTodas() {

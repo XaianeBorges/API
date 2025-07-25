@@ -3,7 +3,11 @@
 package com.flordacidade.api.flor_da_cidade_api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +17,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,17 +33,25 @@ public class UsuarioModel {
     @Column(name = "id_usuario")
     private Integer idUsuario;
 
-    // ALTERAÇÃO APLICADA: Mudança de FetchType.LAZY para FetchType.EAGER
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-    @JoinColumn(name = "id_pessoa", nullable = false)
-    @NotNull
-    private PessoaModel pessoa;
+    @NotBlank(message = "O nome não pode estar em branco.")
+    @Size(min = 3, max = 255, message = "O nome deve ter entre 3 e 255 caracteres.")
+    @Column(nullable = false, length = 255)
+    private String nome;
 
-    @Column(name = "senha", nullable = false)
-    @NotNull
-    @Size(min = 8)
-    private String senha;
+    @NotBlank(message = "O CPF não pode estar em branco.")
+    @Pattern(regexp = "\\d{11}", message = "O CPF deve conter exatamente 11 dígitos numéricos.")
+    @Column(nullable = false, length = 11, unique = true)
+    private String cpf;
+
+    @NotBlank(message = "O e-mail não pode estar em branco.")
+    @Email(message = "O formato do e-mail é inválido.")
+    @Size(max = 255)
+    @Column(nullable = false, length = 255, unique = true)
+    private String email;
+
+    @Size(max = 255, message = "O endereço deve ter no máximo 255 caracteres.")
+    @Column(length = 255)
+    private String endereco;
 
     @CreationTimestamp
     @Column(name = "data_criacao", updatable = false)
@@ -51,13 +64,29 @@ public class UsuarioModel {
     @Column(name = "ativo", nullable = false)
     private Boolean ativo = true;
 
-    @Column(name = "matricula")
-    private String matricula;
+    @NotBlank(message = "O telefone não pode estar em branco.")
+    @Pattern(regexp = "\\d{10,15}", message = "O telefone deve conter apenas números, entre 10 e 15 dígitos.")
+    @Column(nullable = false, length = 15, unique = true)
+    private String telefone;
 
-    @Column(name = "reset_password_token")
-    private String resetPasswordToken;
+    @NotNull(message = "A data de nascimento não pode ser nula.")
+    @Past(message = "A data de nascimento deve ser uma data no passado.")
+    @Column(name = "data_nascimento", nullable = false)
+    private LocalDate dataNascimento;
 
-    @Column(name = "reset_password_token_expiry")
-    private LocalDateTime resetPasswordTokenExpiry;
+    @NotNull(message = "A escolaridade não pode ser nula.")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Escolaridade escolaridade;
 
+    public enum Escolaridade {
+        SEM_ESCOLARIDADE,
+        ENSINO_FUNDAMENTAL_COMPLETO,
+        ENSINO_FUNDAMENTAL_INCOMPLETO,
+        ENSINO_MEDIO_COMPLETO,
+        ENSINO_MEDIO_INCOMPLETO,
+        ENSINO_SUPERIOR_COMPLETO,
+        ENSINO_SUPERIOR_INCOMPLETO,
+        POS_GRADUACAO
+    }
 }

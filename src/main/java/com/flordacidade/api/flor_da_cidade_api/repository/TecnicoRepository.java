@@ -1,6 +1,7 @@
 package com.flordacidade.api.flor_da_cidade_api.repository;
 
 import com.flordacidade.api.flor_da_cidade_api.model.TecnicoModel;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +15,9 @@ public interface TecnicoRepository extends JpaRepository<TecnicoModel, Integer> 
 
     // Necessário se você fosse implementar hashing de senha no futuro
     Optional<TecnicoModel> findByMatricula(String matricula);
+
+    Optional<TecnicoModel> findByEmail(String email);
+
+    Optional<TecnicoModel> findByResetPasswordToken(String token);
+
 }

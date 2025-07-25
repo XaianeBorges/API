@@ -62,9 +62,9 @@ public class PdfService {
             addCell(table, String.valueOf(horta.getQntPessoas()), false);
 
             // Tratando dados de entidades relacionadas
-            if (horta.getUsuario() != null && horta.getUsuario().getPessoa() != null) {
+            if (horta.getUsuario() != null && horta.getUsuario() != null) {
                 addCell(table, "Responsável:", true);
-                addCell(table, horta.getUsuario().getPessoa().getNome(), false);
+                addCell(table, horta.getUsuario().getNome(), false);
             }
 
             if (horta.getUnidadeDeEnsino() != null) {

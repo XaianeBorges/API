@@ -218,10 +218,10 @@ public class HortaService {
 
     private Map<String, Object> mapHortaToPendingRequestDetails(Horta horta) {
         String nomeUsuario = "Usuário Desconhecido";
-        if (horta.getUsuario() != null && horta.getUsuario().getPessoa() != null &&
-                horta.getUsuario().getPessoa().getNome() != null
-                && !horta.getUsuario().getPessoa().getNome().trim().isEmpty()) {
-            nomeUsuario = horta.getUsuario().getPessoa().getNome();
+        if (horta.getUsuario() != null && horta.getUsuario() != null &&
+                horta.getUsuario().getNome() != null
+                && !horta.getUsuario().getNome().trim().isEmpty()) {
+            nomeUsuario = horta.getUsuario().getNome();
         }
         String enderecoHorta = horta.getEndereco() != null && !horta.getEndereco().trim().isEmpty()
                 ? horta.getEndereco()
@@ -241,10 +241,10 @@ public class HortaService {
 
     private Map<String, Object> mapHortaToUserDetails(Horta horta) {
         String nomeUsuario = "Usuário Desconhecido";
-        if (horta.getUsuario() != null && horta.getUsuario().getPessoa() != null &&
-                horta.getUsuario().getPessoa().getNome() != null
-                && !horta.getUsuario().getPessoa().getNome().trim().isEmpty()) {
-            nomeUsuario = horta.getUsuario().getPessoa().getNome();
+        if (horta.getUsuario() != null && horta.getUsuario() != null &&
+                horta.getUsuario().getNome() != null
+                && !horta.getUsuario().getNome().trim().isEmpty()) {
+            nomeUsuario = horta.getUsuario().getNome();
         }
         String enderecoHorta = horta.getEndereco() != null && !horta.getEndereco().trim().isEmpty()
                 ? horta.getEndereco()

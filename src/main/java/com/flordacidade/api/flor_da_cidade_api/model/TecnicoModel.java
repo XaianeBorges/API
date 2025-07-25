@@ -2,6 +2,9 @@ package com.flordacidade.api.flor_da_cidade_api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,7 +46,7 @@ public class TecnicoModel {
     private LocalDateTime dataAtualizacao;
 
     @Column(name = "senha", nullable = false)
-    private String senha; // Lembre-se de NUNCA retornar a senha em GETs. Considere @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String senha;
 
     @Column(name = "nome", nullable = false, length = 45)
     private String nome;
@@ -54,5 +57,18 @@ public class TecnicoModel {
 
     // NOVO CAMPO ADICIONADO
     @Column(name = "is_adm", nullable = false)
-    private boolean isAdm = false; // Mapeia para BOOLEAN ou TINYINT(1) no DB
+    private boolean isAdm = false;
+
+    @NotBlank(message = "O e-mail não pode estar em branco.")
+    @Email(message = "O formato do e-mail é inválido.")
+    @Size(max = 255)
+    @Column(nullable = false, length = 255, unique = true)
+    private String email;
+
+    @Column(name = "redefinir_senha_token")
+    private String resetPasswordToken;
+
+    @Column(name = "redefinir_senha_token_expirado")
+    private LocalDateTime resetPasswordTokenExpiry;
+
 }

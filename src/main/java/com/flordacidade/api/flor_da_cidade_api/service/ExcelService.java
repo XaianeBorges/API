@@ -81,8 +81,8 @@ public class ExcelService {
                 row.createCell(1).setCellValue(horta.getStatusHorta().toString());
                 row.createCell(2).setCellValue(horta.getEndereco());
                 String nomeResponsavel = "N/A";
-                if (horta.getUsuario() != null && horta.getUsuario().getPessoa() != null) {
-                    nomeResponsavel = horta.getUsuario().getPessoa().getNome();
+                if (horta.getUsuario() != null && horta.getUsuario() != null) {
+                    nomeResponsavel = horta.getUsuario().getNome();
                 }
                 row.createCell(3).setCellValue(nomeResponsavel);
                 row.createCell(4).setCellValue(

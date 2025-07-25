@@ -11,7 +11,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -34,8 +33,8 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioModel> create(@Valid @RequestBody UsuarioModel usuario) {
-        UsuarioModel created = service.create(usuario);
+    public ResponseEntity<UsuarioModel> criar(@Valid @RequestBody UsuarioModel usuario) {
+        UsuarioModel created = service.criar(usuario);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -43,9 +42,12 @@ public class UsuarioController {
     public ResponseEntity<UsuarioModel> update(
             @PathVariable Integer id,
             @Valid @RequestBody UsuarioModel usuario) {
-        return service.update(id, usuario)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            UsuarioModel atualizado = service.atualizar(id, usuario);
+            return ResponseEntity.ok(atualizado);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -54,17 +56,4 @@ public class UsuarioController {
         service.delete(id);
     }
 
-    @PostMapping("/esqueci-senha")
-    public ResponseEntity<Void> esqueciSenha(@RequestParam("email") String email) {
-        service.solicitarRedefinicaoSenha(email);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/redefinir-senha")
-    public ResponseEntity<Map<String, String>> redefinirSenha(
-            @RequestParam("token") String token,
-            @RequestParam("novaSenha") String novaSenha) {
-        service.redefinirSenha(token, novaSenha);
-        return ResponseEntity.ok(Map.of("mensagem", "Senha redefinida com sucesso."));
-    }
 }
