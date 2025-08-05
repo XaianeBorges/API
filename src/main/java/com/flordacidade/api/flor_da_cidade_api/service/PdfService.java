@@ -1,6 +1,6 @@
 package com.flordacidade.api.flor_da_cidade_api.service;
 
-import com.flordacidade.api.flor_da_cidade_api.model.Horta;
+import com.flordacidade.api.flor_da_cidade_api.dto.HortaResponseDTO;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -23,7 +23,7 @@ public class PdfService {
 
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
 
-    public ByteArrayInputStream gerarPdfHorta(Horta horta)
+    public ByteArrayInputStream gerarPdfHorta(HortaResponseDTO hortaDTO)
             throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -35,8 +35,7 @@ public class PdfService {
             Paragraph titulo = new Paragraph("Relatório Detalhado da Horta")
                     .setTextAlignment(TextAlignment.CENTER)
                     .setFontSize(20)
-                    .setBold() // <-- CORREÇÃO: Este método existe. Se ainda der erro, há algo errado com a
-                               // dependência.
+                    .setBold()
                     .setMarginBottom(20);
             document.add(titulo);
 
@@ -46,40 +45,32 @@ public class PdfService {
 
             // Adicionando linhas à tabela
 
-            addCell(table, "Nome da Horta:", true);
-            addCell(table, horta.getNomeHorta(), false);
+            addCell(table, "Nome da hortaDTO:", true);
+            addCell(table, hortaDTO.getNomeHorta(), false);
 
             addCell(table, "Status Atual:", true);
-            addCell(table, horta.getStatusHorta().toString(), false);
+            addCell(table, hortaDTO.getStatusHorta().toString(), false);
 
             addCell(table, "Endereço:", true);
-            addCell(table, horta.getEndereco(), false);
+            addCell(table, hortaDTO.getEndereco(), false);
 
             addCell(table, "Tamanho da Área (m²):", true);
-            addCell(table, String.valueOf(horta.getTamanhoAreaProducao()), false);
+            addCell(table, String.valueOf(hortaDTO.getTamanhoAreaProducao()), false);
 
             addCell(table, "Quantidade de Pessoas:", true);
-            addCell(table, String.valueOf(horta.getQntPessoas()), false);
+            addCell(table, String.valueOf(hortaDTO.getQntPessoas()), false);
 
-            // Tratando dados de entidades relacionadas
-            if (horta.getUsuario() != null && horta.getUsuario() != null) {
-                addCell(table, "Responsável:", true);
-                addCell(table, horta.getUsuario().getNome(), false);
-            }
+            addCell(table, "Responsável:", true);
+            addCell(table, hortaDTO.getNomeUsuario(), false);
 
-            if (horta.getUnidadeDeEnsino() != null) {
-                addCell(table, "Unidade de Ensino:", true);
-                addCell(table, horta.getUnidadeDeEnsino().getNome(), false);
-            }
+            addCell(table, "Unidade de Ensino:", true);
+            addCell(table, hortaDTO.getNomeUnidadeEnsino(), false);
 
-            if (horta.getTipoDeHorta() != null) {
-                addCell(table, "Tipo de Horta:", true);
-                addCell(table, horta.getTipoDeHorta().getNome(), false); // Supondo que TipoDeHorta tem
-                                                                         // getDescricao()
-            }
+            addCell(table, "Tipo de Horta:", true);
+            addCell(table, hortaDTO.getNomeTipoDeHorta(), false);
 
             addCell(table, "Data de Criação:", true);
-            addCell(table, horta.getDataCriacao().format(dateFormatter), false);
+            addCell(table, hortaDTO.getDataCriacao().format(dateFormatter), false);
 
             document.add(table);
 
@@ -97,7 +88,6 @@ public class PdfService {
         return new ByteArrayInputStream(out.toByteArray());
     }
 
-    // Método auxiliar para criar células e facilitar a formatação
     private void addCell(Table table, String content, boolean isHeader) {
         Cell cell = new Cell().add(new Paragraph(content));
         cell.setPadding(5);

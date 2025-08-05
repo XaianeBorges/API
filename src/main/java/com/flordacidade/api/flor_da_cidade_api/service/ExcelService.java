@@ -1,7 +1,7 @@
 package com.flordacidade.api.flor_da_cidade_api.service;
 
-import com.flordacidade.api.flor_da_cidade_api.model.CursoModel;
-import com.flordacidade.api.flor_da_cidade_api.model.Horta;
+import com.flordacidade.api.flor_da_cidade_api.dto.CursoResponseDTO;
+import com.flordacidade.api.flor_da_cidade_api.dto.HortaResponseDTO;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -20,7 +20,7 @@ public class ExcelService {
 
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    public ByteArrayInputStream exportarCursosParaExcel(List<CursoModel> cursos) throws IOException {
+    public ByteArrayInputStream exportarCursosParaExcel(List<CursoResponseDTO> cursos) throws IOException {
         String[] columns = { "Nome", "Tipo", "Descrição", "Local", "Instituição", "Público Alvo", "Data Início",
                 "Data Fim", "Inscrição Início", "Inscrição Fim", "Turno", "Vagas", "Carga Horária", "Ativo" };
 
@@ -36,22 +36,22 @@ public class ExcelService {
 
             // Dados
             int rowIdx = 1;
-            for (CursoModel curso : cursos) {
+            for (CursoResponseDTO cursoDTO : cursos) {
                 Row row = sheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(curso.getNome());
-                row.createCell(1).setCellValue(curso.getTipoAtividade().toString());
-                row.createCell(2).setCellValue(curso.getDescricao());
-                row.createCell(3).setCellValue(curso.getLocal());
-                row.createCell(4).setCellValue(curso.getInstituicao());
-                row.createCell(5).setCellValue(curso.getPublicoAlvo().toString());
-                row.createCell(6).setCellValue(curso.getDataInicio().format(dateFormatter));
-                row.createCell(7).setCellValue(curso.getDataFim().format(dateFormatter));
-                row.createCell(8).setCellValue(curso.getDataInscInicio().format(dateFormatter));
-                row.createCell(9).setCellValue(curso.getDataInscFim().format(dateFormatter));
-                row.createCell(10).setCellValue(curso.getTurno().toString());
-                row.createCell(11).setCellValue(curso.getMaxPessoas());
-                row.createCell(12).setCellValue(curso.getCargaHoraria());
-                row.createCell(13).setCellValue(curso.getAtivo() ? "Sim" : "Não");
+                row.createCell(0).setCellValue(cursoDTO.getNome());
+                row.createCell(1).setCellValue(cursoDTO.getTipoAtividade().toString());
+                row.createCell(2).setCellValue(cursoDTO.getDescricao());
+                row.createCell(3).setCellValue(cursoDTO.getLocal());
+                row.createCell(4).setCellValue(cursoDTO.getInstituicao());
+                row.createCell(5).setCellValue(cursoDTO.getPublicoAlvo().toString());
+                row.createCell(6).setCellValue(cursoDTO.getDataInicio().format(dateFormatter));
+                row.createCell(7).setCellValue(cursoDTO.getDataFim().format(dateFormatter));
+                row.createCell(8).setCellValue(cursoDTO.getDataInscInicio().format(dateFormatter));
+                row.createCell(9).setCellValue(cursoDTO.getDataInscFim().format(dateFormatter));
+                row.createCell(10).setCellValue(cursoDTO.getTurno().toString());
+                row.createCell(11).setCellValue(cursoDTO.getMaxPessoas());
+                row.createCell(12).setCellValue(cursoDTO.getCargaHoraria());
+                row.createCell(13).setCellValue(cursoDTO.getAtivo() ? "Sim" : "Não");
             }
 
             workbook.write(out);
@@ -59,7 +59,7 @@ public class ExcelService {
         }
     }
 
-    public ByteArrayInputStream exportarHortasParaExcel(List<Horta> hortas) throws IOException {
+    public ByteArrayInputStream exportarHortasParaExcel(List<HortaResponseDTO> hortas) throws IOException {
         String[] columns = { "Nome da Horta", "Status", "Endereço", "Responsável", "Unidade de Ensino",
                 "Tamanho (m²)", "Qtd. Pessoas" };
 
@@ -75,20 +75,16 @@ public class ExcelService {
 
             // Dados
             int rowIdx = 1;
-            for (Horta horta : hortas) {
+            for (HortaResponseDTO hortaDTO : hortas) {
                 Row row = sheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(horta.getNomeHorta());
-                row.createCell(1).setCellValue(horta.getStatusHorta().toString());
-                row.createCell(2).setCellValue(horta.getEndereco());
-                String nomeResponsavel = "N/A";
-                if (horta.getUsuario() != null && horta.getUsuario() != null) {
-                    nomeResponsavel = horta.getUsuario().getNome();
-                }
-                row.createCell(3).setCellValue(nomeResponsavel);
+                row.createCell(0).setCellValue(hortaDTO.getNomeHorta());
+                row.createCell(1).setCellValue(hortaDTO.getStatusHorta());
+                row.createCell(2).setCellValue(hortaDTO.getEndereco());
+                row.createCell(3).setCellValue(hortaDTO.getNomeUsuario() != null ? hortaDTO.getNomeUsuario() : "N/A");
                 row.createCell(4).setCellValue(
-                        horta.getUnidadeDeEnsino() != null ? horta.getUnidadeDeEnsino().getNome() : "N/A");
-                row.createCell(5).setCellValue(horta.getTamanhoAreaProducao());
-                row.createCell(6).setCellValue(horta.getQntPessoas());
+                        hortaDTO.getNomeUnidadeEnsino() != null ? hortaDTO.getNomeUnidadeEnsino() : "N/A");
+                row.createCell(5).setCellValue(hortaDTO.getTamanhoAreaProducao());
+                row.createCell(6).setCellValue(hortaDTO.getQntPessoas());
             }
 
             workbook.write(out);

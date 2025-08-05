@@ -2,30 +2,37 @@ package com.flordacidade.api.flor_da_cidade_api.service;
 
 import com.flordacidade.api.flor_da_cidade_api.model.AtividadesProdutivas;
 import com.flordacidade.api.flor_da_cidade_api.repository.AtividadesProdutivasRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.flordacidade.api.flor_da_cidade_api.dto.AtividadesProdutivasDTO;
+import com.flordacidade.api.flor_da_cidade_api.mapper.AtividadesProdutivasMapper;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AtividadesProdutivasService {
-    @Autowired
-    private AtividadesProdutivasRepository repo;
 
-    public List<AtividadesProdutivas> listar() {
-        return repo.findAll();
+    private final AtividadesProdutivasRepository repository;
+    private final AtividadesProdutivasMapper mapper;
+
+    public List<AtividadesProdutivasDTO> listarTodos() {
+        return mapper.toDTOList(repository.findAll());
     }
 
-    public Optional<AtividadesProdutivas> buscarPorId(Integer id) {
-        return repo.findById(id);
-    }
-
-    public AtividadesProdutivas salvar(AtividadesProdutivas a) {
-        return repo.save(a);
+    public AtividadesProdutivasDTO salvar(AtividadesProdutivasDTO dto) {
+        AtividadesProdutivas entity = mapper.toEntity(dto);
+        return mapper.toDTO(repository.save(entity));
     }
 
     public void deletar(Integer id) {
-        repo.deleteById(id);
+        repository.deleteById(id);
+    }
+
+    public AtividadesProdutivasDTO buscarPorId(Integer id) {
+        return mapper.toDTO(repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Atividades Produtivas não encontradas")));
     }
 }

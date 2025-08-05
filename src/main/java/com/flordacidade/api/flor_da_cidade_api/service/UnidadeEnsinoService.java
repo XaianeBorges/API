@@ -1,31 +1,36 @@
 package com.flordacidade.api.flor_da_cidade_api.service;
 
+import com.flordacidade.api.flor_da_cidade_api.dto.UnidadeEnsinoDTO;
+import com.flordacidade.api.flor_da_cidade_api.mapper.UnidadeEnsinoMapper;
 import com.flordacidade.api.flor_da_cidade_api.model.UnidadeEnsino;
 import com.flordacidade.api.flor_da_cidade_api.repository.UnidadeEnsinoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UnidadeEnsinoService {
-    @Autowired
-    private UnidadeEnsinoRepository repo;
 
-    public List<UnidadeEnsino> listar() {
-        return repo.findAll();
+    private final UnidadeEnsinoRepository repository;
+    private final UnidadeEnsinoMapper mapper;
+
+    public List<UnidadeEnsinoDTO> listarTodos() {
+        return mapper.toDTOList(repository.findAll());
     }
 
-    public Optional<UnidadeEnsino> buscarPorId(Integer id) {
-        return repo.findById(id);
-    }
-
-    public UnidadeEnsino salvar(UnidadeEnsino a) {
-        return repo.save(a);
+    public UnidadeEnsinoDTO salvar(UnidadeEnsinoDTO dto) {
+        UnidadeEnsino entity = mapper.toEntity(dto);
+        return mapper.toDTO(repository.save(entity));
     }
 
     public void deletar(Integer id) {
-        repo.deleteById(id);
+        repository.deleteById(id);
+    }
+
+    public UnidadeEnsinoDTO buscarPorId(Integer id) {
+        return mapper.toDTO(repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Registro não encontrado")));
     }
 }

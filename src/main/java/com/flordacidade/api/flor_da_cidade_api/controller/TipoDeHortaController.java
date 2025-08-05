@@ -1,44 +1,45 @@
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
-import com.flordacidade.api.flor_da_cidade_api.model.TipoDeHorta;
+import com.flordacidade.api.flor_da_cidade_api.dto.TipoDeHortaDTO;
 import com.flordacidade.api.flor_da_cidade_api.service.TipoDeHortaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/hortas/tipo")
-
+@RequestMapping("/api/tipos-horta")
+@RequiredArgsConstructor
+@Tag(name = "Tipo de Horta", description = "Operações com tipos de horta")
 public class TipoDeHortaController {
-    @Autowired
-    private TipoDeHortaService service;
+
+    private final TipoDeHortaService service;
+
+    @PostMapping
+    @Operation(summary = "Salvar novo tipo de horta")
+    public ResponseEntity<TipoDeHortaDTO> salvar(@RequestBody TipoDeHortaDTO dto) {
+        return ResponseEntity.ok(service.salvar(dto));
+    }
 
     @GetMapping
-    public List<TipoDeHorta> listar() {
-        return service.listar();
+    @Operation(summary = "Listar todos os tipos de horta")
+    public ResponseEntity<List<TipoDeHortaDTO>> listarTodos() {
+        return ResponseEntity.ok(service.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public TipoDeHorta buscar(@PathVariable Integer id) {
-        return service.buscarPorId(id).orElseThrow(() -> new RuntimeException("Tipo de horta não encontrada"));
-    }
-
-    @PostMapping
-    public TipoDeHorta criar(@RequestBody TipoDeHorta a) {
-        return service.salvar(a);
-    }
-
-    @PutMapping("/{id}")
-    public TipoDeHorta atualizar(@PathVariable Integer id, @RequestBody TipoDeHorta a) {
-        return service.buscarPorId(id).map(orig -> {
-            orig.setNome(a.getNome());
-            return service.salvar(orig);
-        }).orElseThrow(() -> new RuntimeException("Tipo de horta não encontrada"));
+    @Operation(summary = "Buscar tipo de horta por ID")
+    public ResponseEntity<TipoDeHortaDTO> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
     }
 
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Integer id) {
+    @Operation(summary = "Deletar tipo de horta por ID")
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         service.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

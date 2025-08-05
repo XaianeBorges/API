@@ -1,6 +1,11 @@
 // src/main/java/com/flordacidade/api/flor_da_cidade_api/service/UsuarioService.java
 package com.flordacidade.api.flor_da_cidade_api.service;
 
+import com.flordacidade.api.flor_da_cidade_api.dto.UsuarioCreateDTO;
+import com.flordacidade.api.flor_da_cidade_api.dto.UsuarioUpdateDTO;
+import com.flordacidade.api.flor_da_cidade_api.exception.BusinessException;
+import com.flordacidade.api.flor_da_cidade_api.exception.ResourceNotFoundException;
+import com.flordacidade.api.flor_da_cidade_api.mapper.UsuarioMapper;
 import com.flordacidade.api.flor_da_cidade_api.model.UsuarioModel;
 import com.flordacidade.api.flor_da_cidade_api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +20,7 @@ import java.util.Optional;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final UsuarioMapper usuarioMapper;
 
     @Transactional(readOnly = true)
     public List<UsuarioModel> getAll() {
@@ -33,60 +39,52 @@ public class UsuarioService {
         return valor.replaceAll("[^0-9]", ""); // Remove tudo que não for um dígito
     }
 
-    // Colocar o restodoa campos
     @Transactional
-    public UsuarioModel criar(UsuarioModel usuario) {
-        // Limpa os dados antes da validação de unicidade
-        String cpfLimpo = limparNumeros(usuario.getCpf());
-        String telefoneLimpo = limparNumeros(usuario.getTelefone());
+    public UsuarioModel criar(UsuarioCreateDTO usuarioDTO) {
+        UsuarioModel novoUsuario = usuarioMapper.createDtoToEntity(usuarioDTO);
 
-        usuario.setCpf(cpfLimpo);
-        usuario.setTelefone(telefoneLimpo);
+        novoUsuario.setCpf(limparNumeros(usuarioDTO.getCpf()));
+        novoUsuario.setTelefone(limparNumeros(usuarioDTO.getTelefone()));
 
-        if (usuarioRepository.existsByCpf(usuario.getCpf())) {
-            throw new IllegalArgumentException("CPF já cadastrado");
+        if (usuarioRepository.existsByCpf(novoUsuario.getCpf())) {
+            throw new BusinessException("CPF já cadastrado");
         }
-        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
-            throw new IllegalArgumentException("E-mail já cadastrado");
+        if (usuarioRepository.existsByEmail(novoUsuario.getEmail())) {
+            throw new BusinessException("E-mail já cadastrado");
         }
-        if (usuarioRepository.existsByTelefone(usuario.getTelefone())) {
-            throw new IllegalArgumentException("Telefone já cadastrado");
+        if (usuarioRepository.existsByTelefone(novoUsuario.getTelefone())) {
+            throw new BusinessException("Telefone já cadastrado");
         }
-        return usuarioRepository.save(usuario);
+
+        return usuarioRepository.save(novoUsuario);
     }
 
     @Transactional
-    public UsuarioModel atualizar(Integer id, UsuarioModel usuarioAtual) {
+    public UsuarioModel atualizar(Integer id, UsuarioUpdateDTO usuarioDTO) {
 
-        String cpfLimpo = limparNumeros(usuarioAtual.getCpf());
-        String telefoneLimpo = limparNumeros(usuarioAtual.getTelefone());
+        UsuarioModel existingUsuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com ID: " + id));
 
-        usuarioAtual.setCpf(cpfLimpo);
-        usuarioAtual.setTelefone(telefoneLimpo);
+        usuarioMapper.updateEntityFromDto(usuarioDTO, existingUsuario);
 
-        return usuarioRepository.findById(id)
-                .map(existing -> {
-                    if (usuarioRepository.existsByCpfAndIdUsuarioNot(usuarioAtual.getCpf(), id)) {
-                        throw new IllegalArgumentException("CPF já cadastrado");
-                    }
-                    if (usuarioRepository.existsByEmailAndIdUsuarioNot(usuarioAtual.getEmail(), id)) {
-                        throw new IllegalArgumentException("E-mail já cadastrado");
-                    }
-                    if (usuarioRepository.existsByTelefoneAndIdUsuarioNot(usuarioAtual.getTelefone(), id)) {
-                        throw new IllegalArgumentException("Telefone já cadastrado");
-                    }
-                    // checar se todos os gets estao aqui
-                    existing.setNome(usuarioAtual.getNome());
-                    existing.setCpf(usuarioAtual.getCpf());
-                    existing.setDataNascimento(usuarioAtual.getDataNascimento());
-                    existing.setEmail(usuarioAtual.getEmail());
-                    existing.setEndereco(usuarioAtual.getEndereco());
-                    existing.setTelefone(usuarioAtual.getTelefone());
-                    existing.setEscolaridade(usuarioAtual.getEscolaridade());
-                    existing.setAtivo(usuarioAtual.getAtivo());
-                    return usuarioRepository.save(existing);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Pessoa não encontrada com ID: " + id));
+        if (usuarioDTO.getCpf() != null) {
+            existingUsuario.setCpf(limparNumeros(usuarioDTO.getCpf()));
+        }
+        if (usuarioDTO.getTelefone() != null) {
+            existingUsuario.setTelefone(limparNumeros(usuarioDTO.getTelefone()));
+        }
+
+        if (usuarioRepository.existsByCpfAndIdUsuarioNot(existingUsuario.getCpf(), id)) {
+            throw new BusinessException("CPF já cadastrado em outro usuário");
+        }
+        if (usuarioRepository.existsByEmailAndIdUsuarioNot(existingUsuario.getEmail(), id)) {
+            throw new BusinessException("E-mail já cadastrado em outro usuário");
+        }
+        if (usuarioRepository.existsByTelefoneAndIdUsuarioNot(existingUsuario.getTelefone(), id)) {
+            throw new BusinessException("Telefone já cadastrado em outro usuário");
+        }
+
+        return usuarioRepository.save(existingUsuario);
     }
 
     @Transactional

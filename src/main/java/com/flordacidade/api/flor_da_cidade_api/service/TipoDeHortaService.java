@@ -1,31 +1,36 @@
 package com.flordacidade.api.flor_da_cidade_api.service;
 
+import com.flordacidade.api.flor_da_cidade_api.dto.TipoDeHortaDTO;
+import com.flordacidade.api.flor_da_cidade_api.mapper.TipoDeHortaMapper;
 import com.flordacidade.api.flor_da_cidade_api.model.TipoDeHorta;
 import com.flordacidade.api.flor_da_cidade_api.repository.TipoDeHortaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TipoDeHortaService {
-    @Autowired
-    private TipoDeHortaRepository repo;
 
-    public List<TipoDeHorta> listar() {
-        return repo.findAll();
+    private final TipoDeHortaRepository repository;
+    private final TipoDeHortaMapper mapper;
+
+    public List<TipoDeHortaDTO> listarTodos() {
+        return mapper.toDTOList(repository.findAll());
     }
 
-    public Optional<TipoDeHorta> buscarPorId(Integer id) {
-        return repo.findById(id);
-    }
-
-    public TipoDeHorta salvar(TipoDeHorta a) {
-        return repo.save(a);
+    public TipoDeHortaDTO salvar(TipoDeHortaDTO dto) {
+        TipoDeHorta entity = mapper.toEntity(dto);
+        return mapper.toDTO(repository.save(entity));
     }
 
     public void deletar(Integer id) {
-        repo.deleteById(id);
+        repository.deleteById(id);
+    }
+
+    public TipoDeHortaDTO buscarPorId(Integer id) {
+        return mapper.toDTO(repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tipo de Horta não encontrado")));
     }
 }

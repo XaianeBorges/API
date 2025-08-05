@@ -1,11 +1,14 @@
 package com.flordacidade.api.flor_da_cidade_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 @Entity
+@Data
+@NoArgsConstructor
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @Table(name = "inscricao_curso")
 public class InscricaoCursoModel {
@@ -15,45 +18,19 @@ public class InscricaoCursoModel {
     @Column(name = "id_inscricao_curso")
     private Integer id;
 
-    @Column(name = "id_usuario", nullable = false)
-    private Integer idUsuario;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private UsuarioModel usuario;
 
-    @Column(name = "id_curso", nullable = false)
-    private Integer idCurso;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_curso", nullable = false)
+    private CursoModel curso;
 
     @Column(name = "data_inscricao", nullable = false, updatable = false)
-    private LocalDateTime dataInscricao = LocalDateTime.now();
+    private LocalDateTime dataInscricao;
 
-    // Getters e Setters
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getIdUsuario() {
-        return idUsuario;
-    }
-
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
-    public Integer getIdCurso() {
-        return idCurso;
-    }
-
-    public void setIdCurso(Integer idCurso) {
-        this.idCurso = idCurso;
-    }
-
-    public LocalDateTime getDataInscricao() {
-        return dataInscricao;
-    }
-
-    public void setDataInscricao(LocalDateTime dataInscricao) {
-        this.dataInscricao = dataInscricao;
+    @PrePersist
+    protected void onCreate() {
+        dataInscricao = LocalDateTime.now();
     }
 }

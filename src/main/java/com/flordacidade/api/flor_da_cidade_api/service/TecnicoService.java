@@ -1,5 +1,8 @@
 package com.flordacidade.api.flor_da_cidade_api.service;
 
+import com.flordacidade.api.flor_da_cidade_api.dto.TecnicoCreateDTO;
+import com.flordacidade.api.flor_da_cidade_api.dto.TecnicoUpdateDTO;
+import com.flordacidade.api.flor_da_cidade_api.mapper.TecnicoMapper;
 import com.flordacidade.api.flor_da_cidade_api.exception.BusinessException;
 import com.flordacidade.api.flor_da_cidade_api.exception.ResourceNotFoundException;
 import com.flordacidade.api.flor_da_cidade_api.model.RegiaoModel;
@@ -24,16 +27,17 @@ public class TecnicoService {
     private final RegiaoRepository regiaoRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final TecnicoMapper tecnicoMapper;
 
     @Autowired
     public TecnicoService(TecnicoRepository tecnicoRepository, RegiaoRepository regiaoRepository,
             EmailService emailService,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder, TecnicoMapper tecnicoMapper) {
         this.tecnicoRepository = tecnicoRepository;
         this.regiaoRepository = regiaoRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
-
+        this.tecnicoMapper = tecnicoMapper;
     }
 
     @Transactional(readOnly = true)
@@ -47,67 +51,48 @@ public class TecnicoService {
     }
 
     @Transactional
-    public TecnicoModel create(TecnicoModel tecnico) {
-        if (tecnicoRepository.findByMatricula(tecnico.getMatricula()).isPresent()) {
-            throw new IllegalArgumentException("Matrícula já cadastrada: " + tecnico.getMatricula());
+    public TecnicoModel create(TecnicoCreateDTO tecnicoDTO) {
+        if (tecnicoRepository.findByMatricula(tecnicoDTO.getMatricula()).isPresent()) {
+            throw new BusinessException("Matrícula já cadastrada: " + tecnicoDTO.getMatricula());
+        }
+        if (tecnicoRepository.findByEmail(tecnicoDTO.getEmail()).isPresent()) {
+            throw new BusinessException("E-mail já cadastrado: " + tecnicoDTO.getEmail());
         }
 
-        if (tecnico.getRegiao() == null || tecnico.getRegiao().getIdRegiao() == null) {
-            throw new IllegalArgumentException("ID da Região do técnico não pode ser nulo.");
-        }
-        RegiaoModel regiao = regiaoRepository.findById(tecnico.getRegiao().getIdRegiao())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Região inválida com ID: " + tecnico.getRegiao().getIdRegiao()));
-        tecnico.setRegiao(regiao);
+        TecnicoModel novoTecnico = tecnicoMapper.createDtoToEntity(tecnicoDTO);
 
-        if (tecnico.getSenha() == null || tecnico.getSenha().isBlank()) {
-            throw new IllegalArgumentException("Senha não pode ser vazia.");
-        }
+        RegiaoModel regiao = regiaoRepository.findById(tecnicoDTO.getIdRegiao())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Região inválida com ID: " + tecnicoDTO.getIdRegiao()));
+        novoTecnico.setRegiao(regiao);
 
-        // LOG PARA DEPURAR O VALOR DE isAdm RECEBIDO
-        System.out.println("TecnicoService DEBUG: Recebido para criar - Nome: " + tecnico.getNome() + ", Matrícula: "
-                + tecnico.getMatricula() + ", isAdm: " + tecnico.isAdm());
+        novoTecnico.setSenha(passwordEncoder.encode(tecnicoDTO.getSenha()));
 
-        return tecnicoRepository.save(tecnico);
+        return tecnicoRepository.save(novoTecnico);
     }
 
     @Transactional
-    public Optional<TecnicoModel> update(Integer id, TecnicoModel tecnicoDetails) {
-        return tecnicoRepository.findById(id)
-                .map(existingTecnico -> {
-                    existingTecnico.setNome(tecnicoDetails.getNome());
+    public TecnicoModel update(Integer id, TecnicoUpdateDTO tecnicoDTO) {
+        TecnicoModel existingTecnico = tecnicoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Técnico não encontrado com ID: " + id));
 
-                    if (!existingTecnico.getMatricula().equals(tecnicoDetails.getMatricula())) {
-                        if (tecnicoRepository.findByMatricula(tecnicoDetails.getMatricula())
-                                .filter(t -> !t.getIdTecnico().equals(id)).isPresent()) {
-                            throw new IllegalArgumentException("Nova matrícula '" + tecnicoDetails.getMatricula()
-                                    + "' já cadastrada para outro técnico.");
-                        }
-                        existingTecnico.setMatricula(tecnicoDetails.getMatricula());
-                    }
+        // Atualiza campos simples
+        tecnicoMapper.updateEntityFromDto(tecnicoDTO, existingTecnico);
 
-                    if (tecnicoDetails.getSenha() != null && !tecnicoDetails.getSenha().trim().isEmpty()) {
-                        existingTecnico.setSenha(tecnicoDetails.getSenha());
-                    }
+        // Atualiza senha (se fornecida)
+        if (tecnicoDTO.getSenha() != null && !tecnicoDTO.getSenha().isBlank()) {
+            existingTecnico.setSenha(passwordEncoder.encode(tecnicoDTO.getSenha()));
+        }
 
-                    existingTecnico.setStatus(tecnicoDetails.getStatus());
+        // Atualiza região (se fornecida)
+        if (tecnicoDTO.getIdRegiao() != null) {
+            RegiaoModel regiao = regiaoRepository.findById(tecnicoDTO.getIdRegiao())
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException("Região inválida com ID: " + tecnicoDTO.getIdRegiao()));
+            existingTecnico.setRegiao(regiao);
+        }
 
-                    if (tecnicoDetails.getRegiao() != null && tecnicoDetails.getRegiao().getIdRegiao() != null) {
-                        RegiaoModel regiao = regiaoRepository.findById(tecnicoDetails.getRegiao().getIdRegiao())
-                                .orElseThrow(() -> new EntityNotFoundException(
-                                        "Região inválida com ID: " + tecnicoDetails.getRegiao().getIdRegiao()));
-                        existingTecnico.setRegiao(regiao);
-                    } else if (tecnicoDetails.getRegiao() != null && tecnicoDetails.getRegiao().getIdRegiao() == null) {
-                        throw new IllegalArgumentException("ID da Região não fornecido para atualização.");
-                    }
-
-                    // LOG PARA DEPURAR O VALOR DE isAdm NO UPDATE
-                    System.out.println("TecnicoService DEBUG: Recebido para atualizar ID " + id + " - isAdm: "
-                            + tecnicoDetails.isAdm());
-                    existingTecnico.setAdm(tecnicoDetails.isAdm());
-
-                    return tecnicoRepository.save(existingTecnico);
-                });
+        return tecnicoRepository.save(existingTecnico);
     }
 
     @Transactional
@@ -129,17 +114,14 @@ public class TecnicoService {
 
     @Transactional
     public void solicitarRedefinicaoSenha(String email) {
-        // 1. Encontra a pessoa pelo e-mail
         TecnicoModel tecnico = tecnicoRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("E-mail não encontrado no sistema."));
 
-        // 3. Gera e salva o token
         String token = UUID.randomUUID().toString();
         tecnico.setResetPasswordToken(token);
         tecnico.setResetPasswordTokenExpiry(LocalDateTime.now().plusHours(1)); // Token expira em 1 hora
         tecnicoRepository.save(tecnico);
 
-        // 4. Envia o e-mail
         emailService.sendPasswordResetEmail(tecnico.getEmail(), token);
     }
 
@@ -149,20 +131,16 @@ public class TecnicoService {
             throw new BusinessException("A nova senha deve ter no mínimo 8 caracteres.");
         }
 
-        // 1. Encontra o usuário pelo token
         TecnicoModel tecnico = tecnicoRepository.findByResetPasswordToken(token)
                 .orElseThrow(() -> new BusinessException("Token inválido ou expirado."));
 
-        // 2. Verifica se o token expirou
         if (tecnico.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
-            // Invalida o token expirado
             tecnico.setResetPasswordToken(null);
             tecnico.setResetPasswordTokenExpiry(null);
             tecnicoRepository.save(tecnico);
             throw new BusinessException("Token expirado. Por favor, solicite uma nova redefinição de senha.");
         }
 
-        // 3. Redefine a senha (criptografada) e invalida o token
         tecnico.setSenha(passwordEncoder.encode(novaSenha));
         tecnico.setResetPasswordToken(null);
         tecnico.setResetPasswordTokenExpiry(null);

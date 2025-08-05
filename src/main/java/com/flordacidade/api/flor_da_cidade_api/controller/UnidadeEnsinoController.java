@@ -1,44 +1,45 @@
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
-import com.flordacidade.api.flor_da_cidade_api.model.UnidadeEnsino;
+import com.flordacidade.api.flor_da_cidade_api.dto.UnidadeEnsinoDTO;
 import com.flordacidade.api.flor_da_cidade_api.service.UnidadeEnsinoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/hortas/unidade-ensino")
-
+@RequestMapping("/api/unidades-ensino")
+@RequiredArgsConstructor
+@Tag(name = "Unidade de Ensino", description = "Operações com unidades de ensino")
 public class UnidadeEnsinoController {
-    @Autowired
-    private UnidadeEnsinoService service;
+
+    private final UnidadeEnsinoService service;
+
+    @PostMapping
+    @Operation(summary = "Salvar nova unidade de ensino")
+    public ResponseEntity<UnidadeEnsinoDTO> salvar(@RequestBody UnidadeEnsinoDTO dto) {
+        return ResponseEntity.ok(service.salvar(dto));
+    }
 
     @GetMapping
-    public List<UnidadeEnsino> listar() {
-        return service.listar();
+    @Operation(summary = "Listar todas as unidades de ensino")
+    public ResponseEntity<List<UnidadeEnsinoDTO>> listarTodos() {
+        return ResponseEntity.ok(service.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public UnidadeEnsino buscar(@PathVariable Integer id) {
-        return service.buscarPorId(id).orElseThrow(() -> new RuntimeException("Unidade de ensino não encontrado"));
-    }
-
-    @PostMapping
-    public UnidadeEnsino criar(@RequestBody UnidadeEnsino a) {
-        return service.salvar(a);
-    }
-
-    @PutMapping("/{id}")
-    public UnidadeEnsino atualizar(@PathVariable Integer id, @RequestBody UnidadeEnsino a) {
-        return service.buscarPorId(id).map(orig -> {
-            orig.setNome(a.getNome());
-            return service.salvar(orig);
-        }).orElseThrow(() -> new RuntimeException("Unidade de ensino não encontrado"));
+    @Operation(summary = "Buscar unidade de ensino por ID")
+    public ResponseEntity<UnidadeEnsinoDTO> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
     }
 
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Integer id) {
+    @Operation(summary = "Deletar unidade de ensino por ID")
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         service.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

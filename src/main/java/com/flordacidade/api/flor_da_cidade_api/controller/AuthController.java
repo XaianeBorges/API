@@ -1,41 +1,50 @@
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
+import com.flordacidade.api.flor_da_cidade_api.dto.LoginRequestDTO;
+import com.flordacidade.api.flor_da_cidade_api.mapper.TecnicoMapper;
 import com.flordacidade.api.flor_da_cidade_api.model.TecnicoModel;
 import com.flordacidade.api.flor_da_cidade_api.repository.TecnicoRepository;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext; // Import SecurityContext
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository; // Import
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse; // Adicionar HttpServletResponse
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Tag(name = "Autenticação", description = "Endpoints de Login e Logout")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final TecnicoRepository tecnicoRepository;
+    private final TecnicoMapper tecnicoMapper;
 
+    @Operation(summary = "Autentica um técnico e cria uma sessão")
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials,
-                                   HttpServletRequest request,
-                                   HttpServletResponse response) { // Adicionar HttpServletResponse
-        String matricula = credentials.get("matricula");
-        String senha = credentials.get("senha");
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+
+        String matricula = loginRequest.getMatricula();
+        String senha = loginRequest.getSenha();
 
         if (matricula == null || senha == null) {
             return ResponseEntity.badRequest().body("Matrícula e senha são obrigatórios.");
@@ -43,43 +52,30 @@ public class AuthController {
 
         try {
             Authentication authenticationRequest = new UsernamePasswordAuthenticationToken(matricula, senha);
+
             Authentication authenticationResult = authenticationManager.authenticate(authenticationRequest);
 
-            // Cria um novo contexto de segurança ou obtém o existente
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(authenticationResult);
-            SecurityContextHolder.setContext(securityContext); // Define o novo contexto para a thread atual
+            SecurityContextHolder.setContext(securityContext);
 
-            // Salva explicitamente o contexto na sessão HTTP
-            // O HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY é "SPRING_SECURITY_CONTEXT"
-            HttpSession session = request.getSession(true); // true para criar se não existir
+            HttpSession session = request.getSession(true);
             session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
 
-            // Log para verificar
-            System.out.println(">>> AuthController: Login bem-sucedido. Sessão ID: " + session.getId());
-            System.out.println(">>> AuthController: SecurityContext salvo na sessão: " + securityContext);
-
-
             UserDetails userDetails = (UserDetails) authenticationResult.getPrincipal();
-            Optional<TecnicoModel> tecnicoOptional = tecnicoRepository.findByMatricula(userDetails.getUsername());
+            TecnicoModel tecnicoAutenticado = tecnicoRepository.findByMatricula(userDetails.getUsername())
+                    .orElseThrow(() -> new InternalAuthenticationServiceException("Técnico não encontrado."));
 
-            if (tecnicoOptional.isPresent()) {
-                TecnicoModel tecnicoAutenticado = tecnicoOptional.get();
-                Map<String, Object> responseBody = new HashMap<>();
-                responseBody.put("idTecnico", tecnicoAutenticado.getIdTecnico());
-                responseBody.put("nome", tecnicoAutenticado.getNome());
-                responseBody.put("matricula", tecnicoAutenticado.getMatricula());
-                responseBody.put("isAdm", tecnicoAutenticado.isAdm());
-
-                return ResponseEntity.ok(responseBody);
-            } else {
-                return ResponseEntity.status(500).body("Erro ao recuperar detalhes do técnico após login.");
-            }
+            return ResponseEntity.ok(tecnicoMapper.toLoginResponseDTO(tecnicoAutenticado));
 
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(401).body("Matrícula ou senha inválidos.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas.");
+        } catch (DisabledException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuário desabilitado.");
+        } catch (InternalAuthenticationServiceException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno de autenticação.");
         } catch (Exception e) {
-            return ResponseEntity.status(401).body("Falha na autenticação: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro inesperado: " + e.getMessage());
         }
     }
 

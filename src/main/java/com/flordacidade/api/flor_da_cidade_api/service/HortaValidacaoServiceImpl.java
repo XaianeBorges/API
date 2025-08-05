@@ -7,6 +7,11 @@ import com.flordacidade.api.flor_da_cidade_api.model.TecnicoModel;
 import com.flordacidade.api.flor_da_cidade_api.repository.HortaRepository;
 import com.flordacidade.api.flor_da_cidade_api.repository.HortaValidacaoRepository;
 import com.flordacidade.api.flor_da_cidade_api.repository.TecnicoRepository;
+import com.flordacidade.api.flor_da_cidade_api.dto.HortaValidacaoRequestDTO;
+import com.flordacidade.api.flor_da_cidade_api.dto.HortaValidacaoResponseDTO;
+import com.flordacidade.api.flor_da_cidade_api.mapper.HortaValidacaoMapper;
+import com.flordacidade.api.flor_da_cidade_api.exception.ResourceNotFoundException;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -14,30 +19,31 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HortaValidacaoServiceImpl implements HortaValidacaoService {
 
-    private final HortaValidacaoRepository validacaoRepository;
+    private final HortaValidacaoRepository hortaValidacaoRepository;
     private final HortaRepository hortaRepository;
     private final TecnicoRepository tecnicoRepository;
+    private final HortaValidacaoMapper mapper;
 
     @Override
     @Transactional
-    public HortaValidacao validarHorta(HortaValidacao validacao) {
-        Horta hortaInput = validacao.getHorta();
+    public HortaValidacaoResponseDTO validarHorta(HortaValidacaoRequestDTO requestDTO) {
+        Horta horta = hortaRepository.findById(requestDTO.getIdHorta())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Horta não encontrada com ID: " + requestDTO.getIdHorta()));
 
-        Horta horta = hortaRepository.findById(hortaInput.getIdHorta())
-                .orElseThrow(() -> new RuntimeException("Horta não encontrada"));
+        TecnicoModel tecnico = tecnicoRepository.findById(requestDTO.getIdTecnico())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Técnico não encontrado com ID: " + requestDTO.getIdTecnico()));
 
-        TecnicoModel tecnico = tecnicoRepository.findById(validacao.getTecnico().getIdTecnico())
-                .orElseThrow(() -> new RuntimeException("Técnico não encontrado"));
+        HortaValidacao novaValidacao = mapper.toEntity(requestDTO);
+        novaValidacao.setHorta(horta);
+        novaValidacao.setTecnico(tecnico);
 
-        // Atualiza o status da horta se enviado
-        if (hortaInput.getStatusHorta() != null) {
-            horta.setStatusHorta(hortaInput.getStatusHorta());
-            hortaRepository.save(horta);
-        }
+        HortaValidacao validacaoSalva = hortaValidacaoRepository.save(novaValidacao);
 
-        validacao.setHorta(horta);
-        validacao.setTecnico(tecnico);
+        horta.setStatusHorta(Horta.StatusHorta.ATIVA);
+        hortaRepository.save(horta);
 
-        return validacaoRepository.save(validacao);
+        return mapper.toResponseDTO(validacaoSalva);
     }
 }

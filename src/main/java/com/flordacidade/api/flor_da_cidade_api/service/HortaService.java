@@ -2,17 +2,14 @@
 
 package com.flordacidade.api.flor_da_cidade_api.service;
 
-import com.flordacidade.api.flor_da_cidade_api.model.AreaClassificacao;
-import com.flordacidade.api.flor_da_cidade_api.model.AtividadesProdutivas;
 import com.flordacidade.api.flor_da_cidade_api.model.Horta;
+import com.flordacidade.api.flor_da_cidade_api.dto.HortaRequestDTO;
+import com.flordacidade.api.flor_da_cidade_api.dto.HortaUpdateDTO;
 import com.flordacidade.api.flor_da_cidade_api.exception.ResourceNotFoundException;
-import com.flordacidade.api.flor_da_cidade_api.model.TipoDeHorta;
+import com.flordacidade.api.flor_da_cidade_api.mapper.HortaMapper;
 import com.flordacidade.api.flor_da_cidade_api.model.UnidadeEnsino;
 import com.flordacidade.api.flor_da_cidade_api.model.UsuarioModel;
-import com.flordacidade.api.flor_da_cidade_api.repository.AreaClassificacaoRepository;
-import com.flordacidade.api.flor_da_cidade_api.repository.AtividadesProdutivasRepository;
 import com.flordacidade.api.flor_da_cidade_api.repository.HortaRepository;
-import com.flordacidade.api.flor_da_cidade_api.repository.TipoDeHortaRepository;
 import com.flordacidade.api.flor_da_cidade_api.repository.UnidadeEnsinoRepository;
 import com.flordacidade.api.flor_da_cidade_api.repository.UsuarioRepository;
 
@@ -42,16 +39,10 @@ public class HortaService {
     private UnidadeEnsinoRepository unidadeEnsinoRepository;
 
     @Autowired
-    private AreaClassificacaoRepository areaClassificacaoRepository;
-
-    @Autowired
-    private AtividadesProdutivasRepository atividadesProdutivasRepository;
-
-    @Autowired
-    private TipoDeHortaRepository tipoDeHortaRepository;
-
-    @Autowired
     private ArquivoService fileStorageService;
+
+    @Autowired
+    private HortaMapper hortaMapper;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -72,113 +63,43 @@ public class HortaService {
         return hortaRepository.findByIdFetchingAllDetails(id);
     }
 
+    // Metodo atualizado com DTO
     @Transactional
-    public Horta salvar(Horta horta, MultipartFile imagem, Integer idUsuario, Integer idUnidadeEnsino,
-            Integer idAreaClassificacao, Integer idAtividadesProdutivas, Integer idTipoDeHorta) {
+    public Horta salvar(HortaRequestDTO hortaDTO, MultipartFile imagem) {
 
-        UsuarioModel usuario = usuarioRepository.findById(idUsuario)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + idUsuario));
-        UnidadeEnsino unidadeEnsino = unidadeEnsinoRepository.findById(idUnidadeEnsino)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Unidade de Ensino não encontrada com id: " + idUnidadeEnsino));
-        AreaClassificacao area = areaClassificacaoRepository.findById(idAreaClassificacao)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Área de Classificação não encontrada com id: " + idAreaClassificacao));
-        AtividadesProdutivas atividade = atividadesProdutivasRepository.findById(idAtividadesProdutivas)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Atividade Produtiva não encontrada com id: " + idAtividadesProdutivas));
-        TipoDeHorta tipo = tipoDeHortaRepository.findById(idTipoDeHorta)
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("Tipo de Horta não encontrado com id: " + idTipoDeHorta));
+        Horta novaHorta = hortaMapper.requestDtoToEntity(hortaDTO);
 
-        horta.setUsuario(usuario);
-        horta.setUnidadeDeEnsino(unidadeEnsino);
-        horta.setAreaClassificacao(area);
-        horta.setAtividadesProdutivas(atividade);
-        horta.setTipoDeHorta(tipo);
+        UsuarioModel usuario = usuarioRepository.findById(hortaDTO.getIdUsuario())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado..."));
+
+        novaHorta.setUsuario(usuario);
 
         if (imagem != null && !imagem.isEmpty()) {
             String nomeArquivo = fileStorageService.storeHortaImage(imagem);
-            horta.setImagemCaminho(nomeArquivo);
+            novaHorta.setImagemCaminho(nomeArquivo);
         } else {
-            horta.setImagemCaminho(PLACEHOLDER_IMAGE_FILENAME);
+            novaHorta.setImagemCaminho("folhin.png"); // Imagem padrão
         }
 
-        horta.setStatusHorta(Horta.StatusHorta.PENDENTE);
-        return hortaRepository.save(horta);
+        novaHorta.setStatusHorta(Horta.StatusHorta.PENDENTE);
+
+        return hortaRepository.save(novaHorta);
     }
 
+    // Metodo crriado/atualizado com DTO
     @Transactional
-    public Horta atualizar(Integer id, Horta hortaAtualizadaInput, MultipartFile novaImagem, Integer idUsuario,
-            Integer idUnidadeEnsino, Integer idAreaClassificacao, Integer idAtividadesProdutivas,
-            Integer idTipoDeHorta) {
-        Horta hortaExistente = hortaRepository.findByIdFetchingAllDetails(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada com id: " + id));
+    public Horta atualizar(Integer id, HortaUpdateDTO hortaUpdateDTO, MultipartFile novaImagem) {
+        Horta hortaExistente = hortaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada..."));
 
-        String imagemAntiga = hortaExistente.getImagemCaminho();
+        hortaMapper.updateEntityFromDto(hortaUpdateDTO, hortaExistente);
 
+        if (hortaUpdateDTO.getIdUnidadeEnsino() != null) {
+            UnidadeEnsino ue = unidadeEnsinoRepository.findById(hortaUpdateDTO.getIdUnidadeEnsino()).orElseThrow();
+            hortaExistente.setUnidadeDeEnsino(ue);
+        }
         if (novaImagem != null && !novaImagem.isEmpty()) {
-            if (imagemAntiga != null && !imagemAntiga.isBlank() && !PLACEHOLDER_IMAGE_FILENAME.equals(imagemAntiga)) {
-                fileStorageService.deleteHortaImage(imagemAntiga);
-            }
-            String nomeNovaImagem = fileStorageService.storeHortaImage(novaImagem);
-            hortaExistente.setImagemCaminho(nomeNovaImagem);
         }
-
-        if (hortaAtualizadaInput.getNomeHorta() != null)
-            hortaExistente.setNomeHorta(hortaAtualizadaInput.getNomeHorta());
-        if (hortaAtualizadaInput.getFuncaoUniEnsino() != null)
-            hortaExistente.setFuncaoUniEnsino(hortaAtualizadaInput.getFuncaoUniEnsino());
-        if (hortaAtualizadaInput.getStatusHorta() != null)
-            hortaExistente.setStatusHorta(hortaAtualizadaInput.getStatusHorta());
-        if (hortaAtualizadaInput.getOcupacaoPrincipal() != null)
-            hortaExistente.setOcupacaoPrincipal(hortaAtualizadaInput.getOcupacaoPrincipal());
-        if (hortaAtualizadaInput.getEndereco() != null)
-            hortaExistente.setEndereco(hortaAtualizadaInput.getEndereco());
-        if (hortaAtualizadaInput.getEnderecoAlternativo() != null)
-            hortaExistente.setEnderecoAlternativo(hortaAtualizadaInput.getEnderecoAlternativo());
-        if (hortaAtualizadaInput.getTamanhoAreaProducao() != null)
-            hortaExistente.setTamanhoAreaProducao(hortaAtualizadaInput.getTamanhoAreaProducao());
-        if (hortaAtualizadaInput.getCaracteristicaGrupo() != null)
-            hortaExistente.setCaracteristicaGrupo(hortaAtualizadaInput.getCaracteristicaGrupo());
-        if (hortaAtualizadaInput.getQntPessoas() != null)
-            hortaExistente.setQntPessoas(hortaAtualizadaInput.getQntPessoas());
-        if (hortaAtualizadaInput.getAtividadeDescricao() != null)
-            hortaExistente.setAtividadeDescricao(hortaAtualizadaInput.getAtividadeDescricao());
-        if (hortaAtualizadaInput.getParceria() != null)
-            hortaExistente.setParceria(hortaAtualizadaInput.getParceria());
-
-        if (idUsuario != null) {
-            UsuarioModel usuario = usuarioRepository.findById(idUsuario)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Usuário de referência não encontrado com id: " + idUsuario));
-            hortaExistente.setUsuario(usuario);
-        }
-        if (idUnidadeEnsino != null) {
-            UnidadeEnsino unidadeEnsino = unidadeEnsinoRepository.findById(idUnidadeEnsino)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Unidade de Ensino não encontrada com id: " + idUnidadeEnsino));
-            hortaExistente.setUnidadeDeEnsino(unidadeEnsino);
-        }
-        if (idAreaClassificacao != null) {
-            AreaClassificacao area = areaClassificacaoRepository.findById(idAreaClassificacao)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Área de Classificação não encontrada com id: " + idAreaClassificacao));
-            hortaExistente.setAreaClassificacao(area);
-        }
-        if (idAtividadesProdutivas != null) {
-            AtividadesProdutivas atividade = atividadesProdutivasRepository.findById(idAtividadesProdutivas)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Atividade Produtiva não encontrada com id: " + idAtividadesProdutivas));
-            hortaExistente.setAtividadesProdutivas(atividade);
-        }
-        if (idTipoDeHorta != null) {
-            TipoDeHorta tipo = tipoDeHortaRepository.findById(idTipoDeHorta)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Tipo de Horta não encontrado com id: " + idTipoDeHorta));
-            hortaExistente.setTipoDeHorta(tipo);
-        }
-
         return hortaRepository.save(hortaExistente);
     }
 

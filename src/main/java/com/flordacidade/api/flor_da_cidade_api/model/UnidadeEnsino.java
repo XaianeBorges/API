@@ -11,7 +11,7 @@ import lombok.Data;
 public class UnidadeEnsino {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idUnidadeDeEnsino;
+    private Integer idUnidadeEnsino;
 
     private String nome;
     private String endereco;

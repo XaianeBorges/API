@@ -1,44 +1,45 @@
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
-import com.flordacidade.api.flor_da_cidade_api.model.AtividadesProdutivas;
+import com.flordacidade.api.flor_da_cidade_api.dto.AtividadesProdutivasDTO;
 import com.flordacidade.api.flor_da_cidade_api.service.AtividadesProdutivasService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/hortas/atividades-produtivas")
-
+@RequestMapping("/api/atividades-produtivas")
+@RequiredArgsConstructor
+@Tag(name = "Atividades Produtivas", description = "Operações com atividades produtivas")
 public class AtividadesProdutivasController {
-    @Autowired
-    private AtividadesProdutivasService service;
 
-    @GetMapping
-    public List<AtividadesProdutivas> listar() {
-        return service.listar();
-    }
+    private final AtividadesProdutivasService service;
 
-    @GetMapping("/{id}")
-    public AtividadesProdutivas buscar(@PathVariable Integer id) {
-        return service.buscarPorId(id).orElseThrow(() -> new RuntimeException("Atividade não encontrada"));
-    }
-
+    @Operation(summary = "Salvar uma nova atividade produtiva")
     @PostMapping
-    public AtividadesProdutivas criar(@RequestBody AtividadesProdutivas a) {
-        return service.salvar(a);
+    public ResponseEntity<AtividadesProdutivasDTO> salvar(@RequestBody AtividadesProdutivasDTO dto) {
+        return ResponseEntity.ok(service.salvar(dto));
     }
 
-    @PutMapping("/{id}")
-    public AtividadesProdutivas atualizar(@PathVariable Integer id, @RequestBody AtividadesProdutivas a) {
-        return service.buscarPorId(id).map(orig -> {
-            orig.setNome(a.getNome());
-            return service.salvar(orig);
-        }).orElseThrow(() -> new RuntimeException("Atividade não encontrada"));
+    @Operation(summary = "Listar todas as atividades produtivas")
+    @GetMapping
+    public ResponseEntity<List<AtividadesProdutivasDTO>> listarTodos() {
+        return ResponseEntity.ok(service.listarTodos());
     }
 
+    @Operation(summary = "Buscar atividade produtiva por ID")
+    @GetMapping("/{id}")
+    public ResponseEntity<AtividadesProdutivasDTO> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
+    }
+
+    @Operation(summary = "Deletar atividade produtiva por ID")
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         service.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }
