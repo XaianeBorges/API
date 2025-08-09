@@ -18,6 +18,8 @@ public class TecnicoUpdateDTO {
     private String senha;
 
     private TecnicoStatus status;
+    
     private Integer idRegiao;
-    private Boolean isAdm;
+
+    private Boolean adm;
 }

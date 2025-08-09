@@ -13,12 +13,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,15 +37,20 @@ public class TecnicoController {
     private final TecnicoMapper tecnicoMapper;
 
     @Operation(summary = "Lista todos os técnicos (visão segura)")
-    @ApiResponse(responseCode = "200", description = "Lista de técnicos retornada", content = @Content(schema = @Schema(implementation = TecnicoResponseDTO.class)))
+    @ApiResponses(value = {
+         @ApiResponse(responseCode = "200", description = "Lista de técnicos retornada", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TecnicoResponseDTO.class))),
+         @ApiResponse(responseCode = "403", description = "Acesso negado, só ADM tem perimssão", content = @Content) })
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<TecnicoResponseDTO>> getAll() {
         List<TecnicoModel> tecnicos = tecnicoService.getAll();
         return ResponseEntity.ok(tecnicoMapper.toResponseDTOList(tecnicos));
     }
 
     @Operation(summary = "Busca técnico por ID")
-    @ApiResponse(responseCode = "200", description = "Técnico encontrado", content = @Content(schema = @Schema(implementation = TecnicoResponseDTO.class)))
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Técnico encontrado", content = @Content(schema = @Schema(implementation = TecnicoResponseDTO.class))),
+        @ApiResponse(responseCode = "404", description = "Técnico não encontrado", content = @Content)})
     @GetMapping("/{id}")
     public ResponseEntity<TecnicoResponseDTO> getById(@PathVariable Integer id) {
         return tecnicoService.getById(id)
@@ -52,15 +59,25 @@ public class TecnicoController {
     }
 
     @Operation(summary = "Cria um novo técnico")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Técnico criado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TecnicoResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Acesso negado, só ADM tem perimssão", content = @Content)})
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TecnicoResponseDTO> create(@Valid @RequestBody TecnicoCreateDTO tecnicoDTO) {
         TecnicoModel createdTecnico = tecnicoService.create(tecnicoDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(tecnicoMapper.toResponseDTO(createdTecnico));
     }
 
     @Operation(summary = "Atualiza um técnico")
-    @ApiResponse(responseCode = "200", description = "Técnico atualizado", content = @Content(schema = @Schema(implementation = TecnicoResponseDTO.class)))
+    @ApiResponses(value = {
+           @ApiResponse(responseCode = "200", description = "Técnico atualizado", content = @Content(schema = @Schema(implementation = TecnicoResponseDTO.class))),
+           @ApiResponse(responseCode = "403", description = "Acesso negado, só ADM tem perimssão", content = @Content),
+           @ApiResponse(responseCode = "404", description = "Técnico não encontrado", content = @Content)
+    })
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TecnicoResponseDTO> update(
             @PathVariable Integer id,
             @Valid @RequestBody TecnicoUpdateDTO tecnicoDTO) {
@@ -76,7 +93,13 @@ public class TecnicoController {
     }
 
     @Operation(summary = "Deleta um tecnico")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Técnico excluído com sucesso", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Acesso negado, só ADM tem perimssão", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Técnico não encontrado", content = @Content)
+    })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         try {
             tecnicoService.delete(id);

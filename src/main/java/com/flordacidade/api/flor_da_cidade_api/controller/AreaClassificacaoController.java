@@ -54,9 +54,7 @@ public class AreaClassificacaoController {
     })
     @PostMapping
     public ResponseEntity<AreaClassificacaoDTO> criar(@Valid @RequestBody AreaClassificacaoDTO dto) {
-        // O serviço agora deve ser ajustado para receber o DTO
         AreaClassificacao entidadeSalva = service.salvar(dto);
-        // Retorna o DTO correspondente com o status HTTP 201 (Created)
         return new ResponseEntity<>(mapper.toDTO(entidadeSalva), HttpStatus.CREATED);
     }
 
@@ -68,8 +66,6 @@ public class AreaClassificacaoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         service.deletar(id);
-        // Retorna o status HTTP 204 (No Content), que é a prática recomendada para
-        // DELETE
         return ResponseEntity.noContent().build();
     }
 }

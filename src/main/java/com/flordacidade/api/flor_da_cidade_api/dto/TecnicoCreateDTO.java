@@ -22,5 +22,5 @@ public class TecnicoCreateDTO {
     @NotNull(message = "O ID da região é obrigatório.")
     private Integer idRegiao;
 
-    private boolean isAdm = false;
+    private boolean adm = false;
 }

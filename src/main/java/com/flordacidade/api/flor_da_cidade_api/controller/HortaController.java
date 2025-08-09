@@ -1,5 +1,3 @@
-// Caminho do Arquivo: src/main/java/com/flordacidade/api/flor_da_cidade_api/controller/HortaController.java
-
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.model.Horta;
@@ -15,6 +13,7 @@ import com.flordacidade.api.flor_da_cidade_api.service.ExcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.InputStreamResource;
@@ -63,8 +62,11 @@ public class HortaController {
     }
 
     @Operation(summary = "Lista todas as hortas cadastradas (visão administrativa)")
-    @ApiResponse(responseCode = "200", description = "Lista de todas as hortas", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de todas as hortas", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class))),
+            @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content) })
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
     public ResponseEntity<List<HortaResponseDTO>> listarTodas() {
         List<Horta> hortas = hortaService.listarTodas();
         return ResponseEntity.ok(hortaMapper.toResponseDTOList(hortas));
@@ -82,21 +84,24 @@ public class HortaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Consertar
     @Operation(summary = "Lista todas as solicitações de hortas com o status de PENDENTE (visão administrativa)")
-    @ApiResponse(responseCode = "200", description = "Lista de todas as hortascom o status PENDENTE", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de todas as hortas com o status PENDENTE", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class))),
+            @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content) })
     @GetMapping("/solicitacoes/pendentes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
     public ResponseEntity<List<Map<String, Object>>> getPendingHortaRequests() {
         List<Map<String, Object>> requests = hortaService.getPendingHortaRequests();
         return ResponseEntity.ok(requests);
     }
 
-    // consertar
-    @Operation(summary = "Lista hortas de acordo com o status selecionado")
+    @Operation(summary = "Lista hortas de acordo com o status selecionado(visão administrativa )")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de hortas com o status X", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class))),
-            @ApiResponse(responseCode = "404", description = "Status não enconttrado", content = @Content) })
+            @ApiResponse(responseCode = "404", description = "Status não enconttrado", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content) })
     @GetMapping("/status/{status}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
     public ResponseEntity<List<Map<String, Object>>> getHortasByStatus(@PathVariable String status) {
         try {
             Horta.StatusHorta statusEnum = Horta.StatusHorta.valueOf(status.toUpperCase());
@@ -145,9 +150,11 @@ public class HortaController {
     @Operation(summary = "Exclui uma horta pelo seu ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Horta excluída com sucesso", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content),
             @ApiResponse(responseCode = "404", description = "Horta não encontrada", content = @Content)
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
     public ResponseEntity<Void> deletar(
             @Parameter(description = "ID da horta a ser excluída") @PathVariable Integer id) {
         hortaService.deletar(id);
@@ -158,9 +165,11 @@ public class HortaController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Status alterado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = HortaResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "Horta não encontrada", content = @Content),
-            @ApiResponse(responseCode = "400", description = "Status inválido", content = @Content)
+            @ApiResponse(responseCode = "400", description = "Status inválido", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content)
     })
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
     public ResponseEntity<HortaResponseDTO> alterarStatus(
             @Parameter(description = "ID da horta que terá o status alterado") @PathVariable Integer id,
             @Parameter(description = "O novo status para a horta", schema = @Schema(implementation = Horta.StatusHorta.class)) @RequestParam("status") Horta.StatusHorta status) {

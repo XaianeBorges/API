@@ -11,7 +11,7 @@ public class TecnicoResponseDTO {
     private String matricula;
     private String nome;
     private String email;
-    private boolean isAdm;
     private LocalDateTime dataCriacao;
     private String nomeRegiao;
+    private boolean adm;
 }

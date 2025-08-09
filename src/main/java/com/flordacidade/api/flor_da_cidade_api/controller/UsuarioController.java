@@ -9,6 +9,7 @@ import com.flordacidade.api.flor_da_cidade_api.mapper.UsuarioMapper;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,26 +28,31 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 @Validated
 @RequiredArgsConstructor
-@Tag(name = "Usuários", description = "Endpoints para o gerenciamento de usuários finais (público geral)")
+@Tag(name = "Usuários", description = "Endpoints para o gerenciamento de usuários (público geral)")
 public class UsuarioController {
 
     private final UsuarioService service;
     private final UsuarioMapper mapper;
 
-    @Operation(summary = "Lista todos os usuários")
-    @ApiResponse(responseCode = "200", description = "Operação bem-sucedida")
+    @Operation(summary = "Lista todos os usuários (Acesso restrito a Admins)")
+   @ApiResponses(value = {
+         @ApiResponse(responseCode = "200", description = "Lista de usuários retornada", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponseDTO.class))),
+         @ApiResponse(responseCode = "403", description = "Acesso negado, só ADM tem perimssão", content = @Content) })
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UsuarioResponseDTO>> getAll() {
         List<UsuarioModel> usuarios = service.getAll();
         return ResponseEntity.ok(mapper.toResponseDTOList(usuarios));
     }
 
-    @Operation(summary = "Busca um usuário pelo seu ID")
+    @Operation(summary = "Busca um usuário pelo seu ID (Acesso restrito a Admins)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuário encontrado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado, só ADM tem perimssão", content = @Content),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado", content = @Content)
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponseDTO> getById(@PathVariable Integer id) {
         return service.getById(id)
                 .map(usuario -> ResponseEntity.ok(mapper.toResponseDTO(usuario)))
@@ -63,13 +70,15 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponseDTO(created));
     }
 
-    @Operation(summary = "Atualiza um usuário existente")
+    @Operation(summary = "Atualiza um usuário existente (Acesso restrito a Admins)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado", content = @Content),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos ou campos únicos já existentes", content = @Content)
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou campos únicos já existentes", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Acesso negado, só ADM tem perimssão", content = @Content)
     })
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponseDTO> update(
             @PathVariable Integer id,
             @Valid @RequestBody UsuarioUpdateDTO usuarioDTO) {
@@ -77,12 +86,14 @@ public class UsuarioController {
         return ResponseEntity.ok(mapper.toResponseDTO(atualizado));
     }
 
-    @Operation(summary = "Exclui um usuário")
+    @Operation(summary = "Exclui um usuário (Acesso restrito a Admins)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Usuário excluído com sucesso", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Acesso negado, só ADM tem perimssão", content = @Content),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado", content = @Content)
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
