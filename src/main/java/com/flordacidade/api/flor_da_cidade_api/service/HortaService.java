@@ -54,13 +54,14 @@ public class HortaService {
     }
     // --- FIM DA ADIÇÃO ---
 
+    @Transactional(readOnly = true)
     public List<Horta> listarTodas() {
-        return hortaRepository.findAll();
+        return hortaRepository.findAllFetchingAllDetails();
     }
 
     @Transactional(readOnly = true)
     public Optional<Horta> buscarPorId(Integer id) {
-        return hortaRepository.findByIdFetchingAllDetails(id);
+        return hortaRepository.findById(id);
     }
 
     // Metodo atualizado com DTO

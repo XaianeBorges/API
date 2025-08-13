@@ -21,11 +21,20 @@ public interface HortaRepository extends JpaRepository<Horta, Integer> {
         // NOVO MÉTODO para buscar Horta por ID com todos os detalhes necessários para a
         // tela de descrição
         @Query("SELECT h FROM Horta h " +
-                        "LEFT JOIN FETCH h.usuario u " +
-                        "LEFT JOIN FETCH h.tipoDeHorta th " +
-                        "LEFT JOIN FETCH h.areaClassificacao ac " +
-                        "LEFT JOIN FETCH h.atividadesProdutivas ap " +
-                        "LEFT JOIN FETCH h.unidadeDeEnsino ue " + // Detalhes da unidade de ensino
-                        "WHERE h.idHorta = :id")
-        Optional<Horta> findByIdFetchingAllDetails(@Param("id") Integer id);
+           "LEFT JOIN FETCH h.usuario u " +
+           "LEFT JOIN FETCH h.tipoDeHorta th " +
+           "LEFT JOIN FETCH h.areaClassificacao ac " +
+           "LEFT JOIN FETCH h.atividadesProdutivas ap " +
+           "LEFT JOIN FETCH h.unidadeDeEnsino ue " +
+           "WHERE h.idHorta = :id")
+        @Override
+        Optional<Horta> findById(@Param("id") Integer id);
+
+        @Query("SELECT DISTINCT h FROM Horta h " +
+           "LEFT JOIN FETCH h.usuario u " +
+           "LEFT JOIN FETCH h.tipoDeHorta th " +
+           "LEFT JOIN FETCH h.areaClassificacao ac " +
+           "LEFT JOIN FETCH h.atividadesProdutivas ap " +
+           "LEFT JOIN FETCH h.unidadeDeEnsino ue")
+        List<Horta> findAllFetchingAllDetails();
 }

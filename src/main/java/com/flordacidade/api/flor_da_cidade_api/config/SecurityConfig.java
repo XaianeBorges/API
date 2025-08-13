@@ -62,19 +62,21 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/hortas/public/ativas").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/regioes").permitAll()
-                        .requestMatchers("/api/cursos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/hortas/**").permitAll() 
+                        .requestMatchers(HttpMethod.GET, "/api/cursos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tipos-horta/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/unidades-ensino/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/atividades-produtivas/**").permitAll()
 
-                        // ======================= INÍCIO DA ALTERAÇÃO =======================
                         // Permissões para fluxos de criação pública
                         .requestMatchers(HttpMethod.POST, "/api/pessoas").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/inscricoes").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/hortas").permitAll() // Permite a solicitação de horta
-                        // ======================== FIM DA ALTERAÇÃO =========================
+                        .requestMatchers(HttpMethod.POST, "/api/hortas").permitAll()
+
+                        // ======================= INÍCIO DA CORREÇÃO =======================
+                        .requestMatchers(HttpMethod.POST, "/api/tecnicos/esqueci-senha").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/tecnicos/redefinir-senha").permitAll()
+                        // ======================== FIM DA CORREÇÃO =========================
 
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll());
