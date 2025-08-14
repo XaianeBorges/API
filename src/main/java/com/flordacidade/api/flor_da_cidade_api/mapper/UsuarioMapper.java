@@ -20,14 +20,14 @@ public interface UsuarioMapper {
     List<UsuarioResponseDTO> toResponseDTOList(List<UsuarioModel> usuarios);
 
     @Mapping(target = "idUsuario", ignore = true)
-    @Mapping(target = "criadoEm", ignore = true)
-    @Mapping(target = "atualizadoEm", ignore = true)
+    @Mapping(target = "dataCriacao", ignore = true)
+    @Mapping(target = "dataAtualizacao", ignore = true)
     @Mapping(target = "ativo", ignore = true) // Ativo é true por padrão na entidade
     UsuarioModel createDtoToEntity(UsuarioCreateDTO createDTO);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "idUsuario", ignore = true)
-    @Mapping(target = "criadoEm", ignore = true)
-    @Mapping(target = "atualizadoEm", ignore = true)
+    @Mapping(target = "dataCriacao", ignore = true)
+    @Mapping(target = "dataAtualizacao", ignore = true)
     void updateEntityFromDto(UsuarioUpdateDTO updateDTO, @MappingTarget UsuarioModel usuarioModel);
 }
