@@ -122,31 +122,28 @@ public class CursoController {
 
         @Operation(summary = "Exporta os cursos ativos para um arquivo Excel", description = "Gera e baixa um arquivo .xlsx com o relatório de todos os cursos com status 'Ativo'.")
         @ApiResponse(responseCode = "200", description = "Arquivo Excel gerado com sucesso") // documentar
-        @GetMapping("/download/excel")
+        @GetMapping("/relatorios/download/excel")
         public ResponseEntity<InputStreamResource> exportarCursosAtivosParaExcel() throws IOException {
+        List<CursoModel> todosOsCursos = cursoService.listarTodos();
 
-                List<CursoModel> todosOsCursos = cursoService.listarTodos();
+        List<CursoModel> cursosAtivos = todosOsCursos.stream()
+                .filter(CursoModel::getAtivo)
+                .collect(Collectors.toList());
 
-                List<CursoModel> cursosAtivos = todosOsCursos.stream()
-                                .filter(CursoModel::getAtivo)
-                                .collect(Collectors.toList());
+        List<CursoResponseDTO> cursosAtivosDTO = cursoMapper.toResponseDTOList(cursosAtivos);
 
-                List<CursoResponseDTO> cursosAtivosDTO = cursoMapper.toResponseDTOList(cursosAtivos);
+        ByteArrayInputStream bais = excelExportService.exportarCursosParaExcel(cursosAtivosDTO);
 
-                ByteArrayInputStream bais = excelExportService.exportarCursosParaExcel(cursosAtivosDTO);
+        HttpHeaders headers = new HttpHeaders();
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String filename = "relatorio-cursos-ativos-" + timestamp + ".xlsx";
 
-                HttpHeaders headers = new HttpHeaders();
-                String timestamp = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-                String filename = "relatorio-cursos-ativos-" + timestamp + ".xlsx";
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
 
-                headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
-
-                return ResponseEntity
-                                .ok()
-                                .headers(headers)
-                                .contentType(
-                                                MediaType.parseMediaType(
-                                                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                                .body(new InputStreamResource(bais));
-        }
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(new InputStreamResource(bais));
+    }
 }

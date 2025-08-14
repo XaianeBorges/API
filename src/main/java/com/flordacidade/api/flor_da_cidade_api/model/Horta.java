@@ -66,23 +66,23 @@ public class Horta {
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_unidade_ensino", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_unidade_de_ensino", nullable = false) 
     private UnidadeEnsino unidadeDeEnsino;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_area_classificacao", nullable = false)
     private AreaClassificacao areaClassificacao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_atividades_produtivas", nullable = false)
     private AtividadesProdutivas atividadesProdutivas;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_usuario", nullable = false)
-    private UsuarioModel usuario; // Usando UsuarioModel para consistência
+    private UsuarioModel usuario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_tipo_de_horta", nullable = false)
     private TipoDeHorta tipoDeHorta;
 
