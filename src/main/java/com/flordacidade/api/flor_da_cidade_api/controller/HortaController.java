@@ -54,39 +54,39 @@ public class HortaController {
     private HortaMapper hortaMapper;
 
     @Operation(summary = "Lista todas as hortas ativas para o mapa público")
-    @ApiResponse(responseCode = "200", description = "Hortas ativas encontradas", content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "200", description = "Hortas ativas encontradas", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class)))
     @GetMapping("/public/ativas")
     public ResponseEntity<List<HortaResponseDTO>> getPublicActiveHortas() {
-        List<HortaResponseDTO> hortasAtivas = hortaService.listarAtivasParaMapa();
-        return ResponseEntity.ok(hortasAtivas);
+        List<Horta> hortasAtivas = hortaService.listarAtivasParaMapa();
+        return ResponseEntity.ok(hortaMapper.toResponseDTOList(hortasAtivas));
     }
 
     @Operation(summary = "Lista todas as hortas cadastradas (visão administrativa)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de todas as hortas", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "Lista de todas as hortas", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class))),
             @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content) })
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
     public ResponseEntity<List<HortaResponseDTO>> listarTodas() {
-        List<HortaResponseDTO> hortas = hortaService.listarTodas();
-        return ResponseEntity.ok(hortas);
+        List<Horta> hortas = hortaService.listarTodas();
+        return ResponseEntity.ok(hortaMapper.toResponseDTOList(hortas));
     }
 
     @Operation(summary = "Busca uma horta pelo seu ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Horta encontrada", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "Horta encontrada", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class))),
             @ApiResponse(responseCode = "404", description = "Horta não encontrada", content = @Content) })
     @GetMapping("/{id}")
     public ResponseEntity<HortaResponseDTO> buscarPorId(
             @Parameter(description = "ID da horta a ser buscada") @PathVariable Integer id) {
         return hortaService.buscarPorId(id)
-                .map(hortaDTO -> ResponseEntity.ok(hortaDTO))
+                .map(horta -> ResponseEntity.ok(hortaMapper.toResponseDTO(horta)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Lista todas as solicitações de hortas com o status de PENDENTE (visão administrativa)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de todas as hortas com o status PENDENTE", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "Lista de todas as hortas com o status PENDENTE", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class))),
             @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content) })
     @GetMapping("/solicitacoes/pendentes")
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
@@ -97,7 +97,7 @@ public class HortaController {
 
     @Operation(summary = "Lista hortas de acordo com o status selecionado(visão administrativa )")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de hortas com o status X", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "Lista de hortas com o status X", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class))),
             @ApiResponse(responseCode = "404", description = "Status não enconttrado", content = @Content),
             @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content) })
     @GetMapping("/status/{status}")
@@ -115,31 +115,36 @@ public class HortaController {
 
     @Operation(summary = "Cria uma nova horta (solicitação)", description = "Cria uma nova horta com status PENDENTE. Requer dados da horta e opcionalmente uma imagem.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Horta criada com sucesso", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "201", description = "Horta criada com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class))),
             @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos", content = @Content)
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HortaResponseDTO> criar(
             @Parameter(description = "Dados da horta a ser criada, em formato JSON.", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = HortaRequestDTO.class))) @RequestPart("horta") @Valid HortaRequestDTO hortaDTO,
+
             @Parameter(description = "Arquivo de imagem da horta (opcional)") @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
 
-        HortaResponseDTO hortaSalva = hortaService.salvar(hortaDTO, imagem);
-        return ResponseEntity.status(HttpStatus.CREATED).body(hortaSalva);
+        Horta hortaSalva = hortaService.salvar(hortaDTO, imagem);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(hortaMapper.toResponseDTO(hortaSalva));
     }
 
     @Operation(summary = "Atualiza uma horta existente", description = "Atualiza os dados de uma horta e/ou sua imagem.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Horta atualizada com sucesso", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "Horta atualizada com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class))),
             @ApiResponse(responseCode = "404", description = "Horta não encontrada", content = @Content)
     })
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HortaResponseDTO> atualizar(
             @Parameter(description = "ID da horta a ser atualizada") @PathVariable Integer id,
+
             @Parameter(description = "Dados da horta a serem atualizados, em formato JSON.", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = HortaUpdateDTO.class))) @RequestPart("horta") @Valid HortaUpdateDTO hortaUpdateDTO,
+
             @Parameter(description = "Novo arquivo de imagem (opcional)") @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
 
-        HortaResponseDTO hortaAtualizada = hortaService.atualizar(id, hortaUpdateDTO, imagem);
-        return ResponseEntity.ok(hortaAtualizada);
+        Horta hortaAtualizada = hortaService.atualizar(id, hortaUpdateDTO, imagem);
+
+        return ResponseEntity.ok(hortaMapper.toResponseDTO(hortaAtualizada));
     }
 
     @Operation(summary = "Exclui uma horta pelo seu ID")
@@ -158,7 +163,7 @@ public class HortaController {
 
     @Operation(summary = "Altera o status de uma horta (ex: PENDENTE para ATIVA)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Status alterado com sucesso", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "Status alterado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = HortaResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "Horta não encontrada", content = @Content),
             @ApiResponse(responseCode = "400", description = "Status inválido", content = @Content),
             @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content)
@@ -169,16 +174,18 @@ public class HortaController {
             @Parameter(description = "ID da horta que terá o status alterado") @PathVariable Integer id,
             @Parameter(description = "O novo status para a horta", schema = @Schema(implementation = Horta.StatusHorta.class)) @RequestParam("status") Horta.StatusHorta status) {
 
-        HortaResponseDTO horta = hortaService.alterarStatus(id, status);
-        return ResponseEntity.ok(horta);
+        Horta horta = hortaService.alterarStatus(id, status);
+        return ResponseEntity.ok(hortaMapper.toResponseDTO(horta));
     }
 
     @Operation(summary = "Exporta os dados de todas as hortas para um arquivo Excel", description = "Gera e baixa um arquivo .xlsx com o relatório de todas as hortas.")
     @ApiResponse(responseCode = "200", description = "Arquivo Excel gerado", content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-    @GetMapping("/relatorios/download/excel") // rota alterada para evitar conflito com /{id}
+    @GetMapping("/download/excel")
     public ResponseEntity<InputStreamResource> exportarHortasParaExcel() throws IOException {
 
-        List<HortaResponseDTO> hortasDTO = hortaService.listarTodas();
+        List<Horta> hortas = hortaService.listarTodas();
+
+        List<HortaResponseDTO> hortasDTO = hortaMapper.toResponseDTOList(hortas);
 
         ByteArrayInputStream bais = excelService.exportarHortasParaExcel(hortasDTO);
 
@@ -194,16 +201,19 @@ public class HortaController {
         return ResponseEntity
                 .ok()
                 .headers(headers)
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .contentType(
+                        MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(new InputStreamResource(bais));
     }
 
     @Operation(summary = "Exporta os dados de uma horta especifica para um arquivo em PDF", description = "Gera e baixa um arquivo .pdf com os dados da horta selecionada.")
-    @ApiResponse(responseCode = "200", description = "Arquivo PDF gerado", content = @Content(mediaType = "application/pdf"))
+    @ApiResponse(responseCode = "200", description = "Arquivo PDF gerado", content = @Content(mediaType = "MediaType.APPLICATION_PDF"))
     @GetMapping("/{id}/pdf")
     public ResponseEntity<InputStreamResource> gerarRelatorioPdf(@PathVariable Integer id) throws IOException {
-        HortaResponseDTO hortaDTO = hortaService.buscarPorId(id)
+        Horta horta = hortaService.buscarPorId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada com ID: " + id));
+
+        HortaResponseDTO hortaDTO = hortaMapper.toResponseDTO(horta);
 
         ByteArrayInputStream bis = pdfService.gerarPdfHorta(hortaDTO);
 

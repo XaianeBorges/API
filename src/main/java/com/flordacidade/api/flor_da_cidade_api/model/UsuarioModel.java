@@ -55,11 +55,11 @@ public class UsuarioModel {
 
     @CreationTimestamp
     @Column(name = "data_criacao", updatable = false)
-    private LocalDateTime dataCriacao;
+    private LocalDateTime criadoEm;
 
     @UpdateTimestamp
     @Column(name = "data_atualizacao")
-    private LocalDateTime dataAtualizacao;
+    private LocalDateTime atualizadoEm;
 
     @Column(name = "ativo", nullable = false)
     private Boolean ativo = true;

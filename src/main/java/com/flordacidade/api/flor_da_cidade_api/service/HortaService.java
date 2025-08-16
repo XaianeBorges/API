@@ -46,25 +46,27 @@ public class HortaService {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-   @Transactional(readOnly = true)
-    public List<HortaResponseDTO> listarAtivasParaMapa() {
-        List<Horta> hortas = hortaRepository.findByStatusHortaFetchingDetails(Horta.StatusHorta.ATIVA);
-        return hortaMapper.toResponseDTOList(hortas);
+    // --- NOVO MÉTODO ADICIONADO PARA O MAPA PÚBLICO ---
+    @Transactional(readOnly = true)
+    public List<Horta> listarAtivasParaMapa() {
+        // Reutiliza a query otimizada que já existe, buscando apenas as hortas ATIVAS.
+        return hortaRepository.findByStatusHortaFetchingDetails(Horta.StatusHorta.ATIVA);
+    }
+    // --- FIM DA ADIÇÃO ---
+
+    @Transactional(readOnly = true)
+    public List<Horta> listarTodas() {
+        return hortaRepository.findAllFetchingAllDetails();
     }
 
     @Transactional(readOnly = true)
-    public List<HortaResponseDTO> listarTodas() {
-        List<Horta> hortas = hortaRepository.findAllFetchingAllDetails();
-        return hortaMapper.toResponseDTOList(hortas);
+    public Optional<Horta> buscarPorId(Integer id) {
+        return hortaRepository.findById(id);
     }
 
-    @Transactional(readOnly = true)
-    public Optional<HortaResponseDTO> buscarPorId(Integer id) {
-        return hortaRepository.findById(id).map(hortaMapper::toResponseDTO);
-    }
-
+    // Metodo atualizado com DTO
     @Transactional
-    public HortaResponseDTO salvar(HortaRequestDTO hortaDTO, MultipartFile imagem) {
+    public Horta salvar(HortaRequestDTO hortaDTO, MultipartFile imagem) {
 
         Horta novaHorta = hortaMapper.requestDtoToEntity(hortaDTO);
 
@@ -77,17 +79,17 @@ public class HortaService {
             String nomeArquivo = fileStorageService.storeHortaImage(imagem);
             novaHorta.setImagemCaminho(nomeArquivo);
         } else {
-            novaHorta.setImagemCaminho(PLACEHOLDER_IMAGE_FILENAME);
+            novaHorta.setImagemCaminho("folhin.png"); // Imagem padrão
         }
 
         novaHorta.setStatusHorta(Horta.StatusHorta.PENDENTE);
 
-        Horta salvo = hortaRepository.save(novaHorta);
-        return hortaMapper.toResponseDTO(salvo);
+        return hortaRepository.save(novaHorta);
     }
 
+    // Metodo crriado/atualizado com DTO
     @Transactional
-    public HortaResponseDTO atualizar(Integer id, HortaUpdateDTO hortaUpdateDTO, MultipartFile novaImagem) {
+    public Horta atualizar(Integer id, HortaUpdateDTO hortaUpdateDTO, MultipartFile novaImagem) {
         Horta hortaExistente = hortaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada..."));
 
@@ -97,19 +99,9 @@ public class HortaService {
             UnidadeEnsino ue = unidadeEnsinoRepository.findById(hortaUpdateDTO.getIdUnidadeEnsino()).orElseThrow();
             hortaExistente.setUnidadeDeEnsino(ue);
         }
-
         if (novaImagem != null && !novaImagem.isEmpty()) {
-            String nomeArquivo = fileStorageService.storeHortaImage(novaImagem);
-            // remover antiga se não for placeholder
-            String antiga = hortaExistente.getImagemCaminho();
-            hortaExistente.setImagemCaminho(nomeArquivo);
-            if (antiga != null && !antiga.isBlank() && !PLACEHOLDER_IMAGE_FILENAME.equals(antiga)) {
-                fileStorageService.deleteHortaImage(antiga);
-            }
         }
-
-        Horta salvo = hortaRepository.save(hortaExistente);
-        return hortaMapper.toResponseDTO(salvo);
+        return hortaRepository.save(hortaExistente);
     }
 
     @Transactional
@@ -127,12 +119,11 @@ public class HortaService {
     }
 
     @Transactional
-    public HortaResponseDTO alterarStatus(Integer id, Horta.StatusHorta status) {
+    public Horta alterarStatus(Integer id, Horta.StatusHorta status) {
         Horta horta = hortaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada com id: " + id));
         horta.setStatusHorta(status);
-        Horta salvo = hortaRepository.save(horta);
-        return hortaMapper.toResponseDTO(salvo);
+        return hortaRepository.save(horta);
     }
 
     @Transactional(readOnly = true)
@@ -149,7 +140,7 @@ public class HortaService {
 
     private Map<String, Object> mapHortaToPendingRequestDetails(Horta horta) {
         String nomeUsuario = "Usuário Desconhecido";
-        if (horta.getUsuario() != null &&
+        if (horta.getUsuario() != null && horta.getUsuario() != null &&
                 horta.getUsuario().getNome() != null
                 && !horta.getUsuario().getNome().trim().isEmpty()) {
             nomeUsuario = horta.getUsuario().getNome();
@@ -172,7 +163,7 @@ public class HortaService {
 
     private Map<String, Object> mapHortaToUserDetails(Horta horta) {
         String nomeUsuario = "Usuário Desconhecido";
-        if (horta.getUsuario() != null &&
+        if (horta.getUsuario() != null && horta.getUsuario() != null &&
                 horta.getUsuario().getNome() != null
                 && !horta.getUsuario().getNome().trim().isEmpty()) {
             nomeUsuario = horta.getUsuario().getNome();

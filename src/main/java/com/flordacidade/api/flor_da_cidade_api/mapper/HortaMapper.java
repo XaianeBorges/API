@@ -21,15 +21,6 @@ public interface HortaMapper {
     @Mapping(source = "areaClassificacao.nome", target = "nomeAreaClassificacao")
     @Mapping(source = "atividadesProdutivas.nome", target = "nomeAtividadesProdutivas")
     @Mapping(source = "tipoDeHorta.nome", target = "nomeTipoDeHorta")
-    @Mapping(source = "unidadeDeEnsino.idUnidadeEnsino", target = "idUnidadeEnsino")
-    @Mapping(source = "areaClassificacao.idAreaClassificacao", target = "idAreaClassificacao")
-    @Mapping(source = "atividadesProdutivas.idAtividadesProdutivas", target = "idAtividadesProdutivas")
-    @Mapping(source = "tipoDeHorta.idTipoDeHorta", target = "idTipoDeHorta")
-    @Mapping(source = "usuario.idUsuario", target = "idUsuario")
-    @Mapping(source = "usuario.cpf", target = "usuarioCpf")
-    @Mapping(source = "usuario.dataNascimento", target = "usuarioDataNascimento")
-    @Mapping(source = "usuario.telefone", target = "usuarioTelefone")
-    @Mapping(source = "usuario.email", target = "usuarioEmail")
     @Mapping(source = "imagemCaminho", target = "imagemUrl", qualifiedByName = "caminhoParaUrl")
     HortaResponseDTO toResponseDTO(Horta horta);
 
@@ -52,8 +43,8 @@ public interface HortaMapper {
     @Mapping(target = "imagemCaminho", ignore = true)
     @Mapping(target = "dataCriacao", ignore = true)
     @Mapping(target = "dataAtualizacao", ignore = true)
-    @Mapping(target = "usuario", ignore = true)
-    @Mapping(target = "unidadeDeEnsino", ignore = true)
+    @Mapping(target = "usuario", ignore = true) // O dono original da horta não deve ser mudado aqui
+    @Mapping(target = "unidadeDeEnsino", ignore = true) // Relações são tratadas no serviço
     @Mapping(target = "areaClassificacao", ignore = true)
     @Mapping(target = "atividadesProdutivas", ignore = true)
     @Mapping(target = "tipoDeHorta", ignore = true)
@@ -62,8 +53,11 @@ public interface HortaMapper {
     @Named("caminhoParaUrl")
     default String caminhoParaUrl(String caminho) {
         if (caminho == null || caminho.isBlank() || "folhin.png".equals(caminho)) {
+            // Você pode querer retornar uma URL para uma imagem padrão
             return "/api/arquivos/hortas/folhin.png";
         }
+        // Idealmente, a URL base deveria vir de um arquivo de configuração
+        // (application.properties)
         return "/api/arquivos/hortas/" + caminho;
     }
 }

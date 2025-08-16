@@ -11,15 +11,9 @@ import lombok.Data;
 public class UnidadeEnsino {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_unidade_de_ensino") 
     private Integer idUnidadeEnsino;
 
-    @Column(name = "nome")
     private String nome;
-
-    @Column(name = "endereco")
     private String endereco;
-
-    @Column(name = "tipo")
     private String tipo;
 }
