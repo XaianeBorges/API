@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 @Entity
 @Data
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
@@ -63,9 +66,11 @@ public class CursoModel {
     @Column(nullable = false)
     private Integer maxPessoas;
 
+    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime dataCriacao;
 
+    @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime dataAtualizacao;
 
@@ -82,15 +87,5 @@ public class CursoModel {
 
     public enum Turno {
         Manhã, Tarde, Noite
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        dataCriacao = dataAtualizacao = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        dataAtualizacao = LocalDateTime.now();
     }
 }

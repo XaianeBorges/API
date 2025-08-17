@@ -89,6 +89,9 @@ public class UsuarioService {
 
     @Transactional
     public void delete(Integer id) {
+        if (!usuarioRepository.existsById(id)) {
+        throw new ResourceNotFoundException("Usuário não encontrado com ID: " + id);
+    }
         usuarioRepository.deleteById(id);
     }
 

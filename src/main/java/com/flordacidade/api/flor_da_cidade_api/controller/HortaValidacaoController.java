@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,6 +32,7 @@ public class HortaValidacaoController {
             @ApiResponse(responseCode = "404", description = "Horta ou Técnico não encontrado com o ID fornecido", content = @Content)
     })
     @PostMapping
+    @PreAuthorize("hasAnyRole('TECNICO')")
     public ResponseEntity<HortaValidacaoResponseDTO> validar(
             @Valid @RequestBody HortaValidacaoRequestDTO validacaoRequestDTO) {
         HortaValidacaoResponseDTO responseDTO = service.validarHorta(validacaoRequestDTO);

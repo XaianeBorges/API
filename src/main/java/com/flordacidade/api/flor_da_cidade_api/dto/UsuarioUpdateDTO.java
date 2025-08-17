@@ -28,5 +28,4 @@ public class UsuarioUpdateDTO {
 
     private Escolaridade escolaridade;
 
-    private Boolean ativo;
 }

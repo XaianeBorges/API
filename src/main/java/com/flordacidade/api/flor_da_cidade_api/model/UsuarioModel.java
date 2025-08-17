@@ -61,9 +61,6 @@ public class UsuarioModel {
     @Column(name = "data_atualizacao")
     private LocalDateTime atualizadoEm;
 
-    @Column(name = "ativo", nullable = false)
-    private Boolean ativo = true;
-
     @NotBlank(message = "O telefone não pode estar em branco.")
     @Pattern(regexp = "\\d{10,15}", message = "O telefone deve conter apenas números, entre 10 e 15 dígitos.")
     @Column(nullable = false, length = 15, unique = true)

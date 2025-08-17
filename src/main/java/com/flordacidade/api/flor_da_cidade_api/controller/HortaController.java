@@ -3,25 +3,28 @@ package com.flordacidade.api.flor_da_cidade_api.controller;
 import com.flordacidade.api.flor_da_cidade_api.model.Horta;
 import com.flordacidade.api.flor_da_cidade_api.exception.*;
 import com.flordacidade.api.flor_da_cidade_api.service.HortaService;
+import com.flordacidade.api.flor_da_cidade_api.dto.HortaComUsuarioDTO;
 import com.flordacidade.api.flor_da_cidade_api.dto.HortaRequestDTO;
 import com.flordacidade.api.flor_da_cidade_api.dto.HortaResponseDTO;
 import com.flordacidade.api.flor_da_cidade_api.dto.HortaUpdateDTO;
 import com.flordacidade.api.flor_da_cidade_api.mapper.HortaMapper;
 import com.flordacidade.api.flor_da_cidade_api.service.PdfService;
 import com.flordacidade.api.flor_da_cidade_api.service.ExcelService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,24 +37,18 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/hortas")
 @Tag(name = "Hortas", description = "Endpoints para o gerenciamento completo de hortas")
 public class HortaController {
 
-    @Autowired
-    private HortaService hortaService;
-
-    @Autowired
-    private ExcelService excelService;
-
-    @Autowired
-    private PdfService pdfService;
-
-    @Autowired
-    private HortaMapper hortaMapper;
+    private final HortaService hortaService;
+    private final ExcelService excelService;
+    private final PdfService pdfService;
+    private final HortaMapper hortaMapper;
+    private final ObjectMapper objectMapper;
 
     @Operation(summary = "Lista todas as hortas ativas para o mapa público")
     @ApiResponse(responseCode = "200", description = "Hortas ativas encontradas", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class)))
@@ -90,11 +87,11 @@ public class HortaController {
             @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content) })
     @GetMapping("/solicitacoes/pendentes")
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
-    public ResponseEntity<List<Map<String, Object>>> getPendingHortaRequests() {
-        List<Map<String, Object>> requests = hortaService.getPendingHortaRequests();
-        return ResponseEntity.ok(requests);
+    public ResponseEntity<List<HortaComUsuarioDTO>> getPendingHortaRequests() {
+    List<HortaComUsuarioDTO> requests = hortaService.getPendingHortaRequests();
+    return ResponseEntity.ok(requests);
     }
-
+    
     @Operation(summary = "Lista hortas de acordo com o status selecionado(visão administrativa )")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de hortas com o status X", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class))),
@@ -102,12 +99,12 @@ public class HortaController {
             @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content) })
     @GetMapping("/status/{status}")
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
-    public ResponseEntity<List<Map<String, Object>>> getHortasByStatus(@PathVariable String status) {
-        try {
-            Horta.StatusHorta statusEnum = Horta.StatusHorta.valueOf(status.toUpperCase());
-            List<Map<String, Object>> hortas = hortaService.getHortasByStatusWithUserDetails(statusEnum);
-            return ResponseEntity.ok(hortas);
-        } catch (IllegalArgumentException e) {
+    public ResponseEntity<List<HortaComUsuarioDTO>> getHortasByStatus(@PathVariable String status) {
+    try {
+        Horta.StatusHorta statusEnum = Horta.StatusHorta.valueOf(status.toUpperCase());
+        List<HortaComUsuarioDTO> hortas = hortaService.getHortasByStatusWithUserDetails(statusEnum);
+        return ResponseEntity.ok(hortas);
+    } catch (IllegalArgumentException e) {
             System.err.println("Status inválido fornecido para /api/hortas/status: " + status + " - " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
@@ -120,13 +117,19 @@ public class HortaController {
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HortaResponseDTO> criar(
-            @Parameter(description = "Dados da horta a ser criada, em formato JSON.", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = HortaRequestDTO.class))) @RequestPart("horta") @Valid HortaRequestDTO hortaDTO,
+        @RequestPart("horta") String hortaJson, 
+        @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
 
-            @Parameter(description = "Arquivo de imagem da horta (opcional)") @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+     try {
 
+        HortaRequestDTO hortaDTO = objectMapper.readValue(hortaJson, HortaRequestDTO.class);
+        
         Horta hortaSalva = hortaService.salvar(hortaDTO, imagem);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(hortaMapper.toResponseDTO(hortaSalva));
+
+     } catch (JsonProcessingException e) { 
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O formato do JSON enviado é inválido.", e);
+     }
     }
 
     @Operation(summary = "Atualiza uma horta existente", description = "Atualiza os dados de uma horta e/ou sua imagem.")
@@ -136,15 +139,19 @@ public class HortaController {
     })
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HortaResponseDTO> atualizar(
-            @Parameter(description = "ID da horta a ser atualizada") @PathVariable Integer id,
+        @PathVariable Integer id,
+        @RequestPart("horta") String hortaUpdateJson, 
+        @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
 
-            @Parameter(description = "Dados da horta a serem atualizados, em formato JSON.", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = HortaUpdateDTO.class))) @RequestPart("horta") @Valid HortaUpdateDTO hortaUpdateDTO,
-
-            @Parameter(description = "Novo arquivo de imagem (opcional)") @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+     try {
+        HortaUpdateDTO hortaUpdateDTO = objectMapper.readValue(hortaUpdateJson, HortaUpdateDTO.class);
 
         Horta hortaAtualizada = hortaService.atualizar(id, hortaUpdateDTO, imagem);
-
         return ResponseEntity.ok(hortaMapper.toResponseDTO(hortaAtualizada));
+        
+      } catch (JsonProcessingException e) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O formato do JSON enviado para atualização é inválido.", e);
+      }
     }
 
     @Operation(summary = "Exclui uma horta pelo seu ID")

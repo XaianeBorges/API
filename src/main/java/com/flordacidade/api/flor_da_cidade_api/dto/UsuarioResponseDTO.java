@@ -12,7 +12,6 @@ public class UsuarioResponseDTO {
     private String cpf;
     private String email;
     private String endereco;
-    private Boolean ativo;
     private String telefone;
     private LocalDate dataNascimento;
     private Escolaridade escolaridade;

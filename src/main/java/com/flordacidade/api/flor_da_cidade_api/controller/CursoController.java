@@ -7,12 +7,15 @@ import com.flordacidade.api.flor_da_cidade_api.dto.CursoRequestDTO;
 import com.flordacidade.api.flor_da_cidade_api.dto.CursoResponseDTO;
 import com.flordacidade.api.flor_da_cidade_api.dto.CursoUpdateDTO;
 import com.flordacidade.api.flor_da_cidade_api.mapper.CursoMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -24,7 +27,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -45,6 +47,7 @@ public class CursoController {
         private final CursoService cursoService;
         private final ExcelService excelExportService;
         private final CursoMapper cursoMapper;
+        private final ObjectMapper objectMapper;
 
         @Operation(summary = "Obtém as opções de enums para formulários de cursos", description = "Retorna uma lista de valores possíveis para os tipos de atividade, públicos-alvo e turnos.")
         @ApiResponse(responseCode = "200", description = "Opções retornadas com sucesso")
@@ -86,13 +89,21 @@ public class CursoController {
                         @ApiResponse(responseCode = "201", description = "Curso criado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CursoResponseDTO.class))),
                         @ApiResponse(responseCode = "400", description = "Dados inválidos", content = @Content)
         })
-        @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+       @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<CursoResponseDTO> criar(
-                        @Parameter(description = "Dados do curso em JSON", schema = @Schema(type = "string", format = "binary")) @RequestPart("curso") @Valid CursoRequestDTO cursoDTO,
-                        @Parameter(description = "Arquivo de imagem para o banner (opcional)") @RequestPart(value = "banner", required = false) MultipartFile bannerFile) {
+          @Parameter(description = "Dados do curso em JSON", schema = @Schema(type = "string", format = "binary")) @RequestPart("curso") String cursoJson, 
+          @Parameter(description = "Arquivo de imagem para o banner (opcional)") @RequestPart(value = "banner", required = false) MultipartFile bannerFile) {
+    
+          try {
 
-                CursoModel cursoSalvo = cursoService.salvar(cursoDTO, bannerFile);
-                return ResponseEntity.status(HttpStatus.CREATED).body(cursoMapper.toResponseDTO(cursoSalvo));
+              CursoRequestDTO cursoDTO = objectMapper.readValue(cursoJson, CursoRequestDTO.class);
+
+              CursoModel cursoSalvo = cursoService.salvar(cursoDTO, bannerFile);
+              return ResponseEntity.status(HttpStatus.CREATED).body(cursoMapper.toResponseDTO(cursoSalvo));
+
+          } catch (JsonProcessingException e) {
+             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Formato do JSON do curso é inválido.", e);
+            }
         }
 
         @Operation(summary = "Atualiza um curso ou oficina existente")
@@ -102,12 +113,20 @@ public class CursoController {
         })
         @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<CursoResponseDTO> atualizar(
-                        @Parameter(description = "ID do curso a ser atualizado") @PathVariable Integer id,
-                        @Parameter(description = "Dados do curso a serem atualizados, em JSON", schema = @Schema(type = "string", format = "binary")) @RequestPart("curso") @Valid CursoUpdateDTO cursoUpdateDTO,
-                        @Parameter(description = "Novo arquivo de imagem para o banner (opcional)") @RequestPart(value = "banner", required = false) MultipartFile bannerFile) {
+          @Parameter(description = "ID do curso a ser atualizado") @PathVariable Integer id,
+          @Parameter(description = "Dados do curso a serem atualizados, em JSON", schema = @Schema(type = "string", format = "binary")) @RequestPart("curso") String cursoUpdateJson, // Mude de CursoUpdateDTO para String
+          @Parameter(description = "Novo arquivo de imagem para o banner (opcional)") @RequestPart(value = "banner", required = false) MultipartFile bannerFile) {
+    
+          try {
+        
+            CursoUpdateDTO cursoUpdateDTO = objectMapper.readValue(cursoUpdateJson, CursoUpdateDTO.class);
 
-                CursoModel cursoAtualizado = cursoService.atualizar(id, cursoUpdateDTO, bannerFile);
-                return ResponseEntity.ok(cursoMapper.toResponseDTO(cursoAtualizado));
+            CursoModel cursoAtualizado = cursoService.atualizar(id, cursoUpdateDTO, bannerFile);
+            return ResponseEntity.ok(cursoMapper.toResponseDTO(cursoAtualizado));
+
+          } catch (JsonProcessingException e) {
+             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Formato do JSON de atualização do curso é inválido.", e);
+           }
         }
 
         @Operation(summary = "Exclui um curso ou oficina")
