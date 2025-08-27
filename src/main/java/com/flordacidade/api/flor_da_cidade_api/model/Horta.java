@@ -68,7 +68,7 @@ public class Horta {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_unidade_ensino", nullable = false)
-    private UnidadeEnsino unidadeDeEnsino;
+    private UnidadeEnsino unidadeEnsino;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_area_classificacao", nullable = false)

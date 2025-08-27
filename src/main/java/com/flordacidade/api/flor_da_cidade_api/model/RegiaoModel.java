@@ -17,7 +17,7 @@ public class RegiaoModel {
     @Column(name = "id_regiao") 
     private Integer idRegiao;
 
-    @Column(name = "nome", nullable = false, unique = true)
+    @Column(name = "nome", nullable = false, unique = true, length = 500)
     private String nome;
 
 }

@@ -25,7 +25,7 @@ public interface HortaRepository extends JpaRepository<Horta, Integer> {
            "LEFT JOIN FETCH h.tipoDeHorta th " +
            "LEFT JOIN FETCH h.areaClassificacao ac " +
            "LEFT JOIN FETCH h.atividadesProdutivas ap " +
-           "LEFT JOIN FETCH h.unidadeDeEnsino ue " +
+           "LEFT JOIN FETCH h.unidadeEnsino ue " +
            "WHERE h.idHorta = :id")
         @Override
         Optional<Horta> findById(@Param("id") Integer id);
@@ -35,6 +35,6 @@ public interface HortaRepository extends JpaRepository<Horta, Integer> {
            "LEFT JOIN FETCH h.tipoDeHorta th " +
            "LEFT JOIN FETCH h.areaClassificacao ac " +
            "LEFT JOIN FETCH h.atividadesProdutivas ap " +
-           "LEFT JOIN FETCH h.unidadeDeEnsino ue")
+           "LEFT JOIN FETCH h.unidadeEnsino ue")
         List<Horta> findAllFetchingAllDetails();
 }

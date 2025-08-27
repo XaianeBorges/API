@@ -78,7 +78,7 @@ public class HortaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Tipo de Horta não encontrado com ID: " + hortaDTO.getIdTipoDeHorta()));
 
         novaHorta.setUsuario(usuario);
-        novaHorta.setUnidadeDeEnsino(unidadeEnsino);
+        novaHorta.setUnidadeEnsino(unidadeEnsino);
         novaHorta.setAreaClassificacao(areaClassificacao);
         novaHorta.setAtividadesProdutivas(atividadesProdutivas);
         novaHorta.setTipoDeHorta(tipoDeHorta);
@@ -108,7 +108,7 @@ public class HortaService {
         if (hortaUpdateDTO.getIdUnidadeEnsino() != null) {
             UnidadeEnsino ue = unidadeEnsinoRepository.findById(hortaUpdateDTO.getIdUnidadeEnsino())
                     .orElseThrow(() -> new ResourceNotFoundException("Unidade de Ensino não encontrada."));
-            hortaExistente.setUnidadeDeEnsino(ue);
+            hortaExistente.setUnidadeEnsino(ue);
         }
         if (hortaUpdateDTO.getIdAreaClassificacao() != null) {
             AreaClassificacao ac = areaClassificacaoRepository.findById(hortaUpdateDTO.getIdAreaClassificacao())

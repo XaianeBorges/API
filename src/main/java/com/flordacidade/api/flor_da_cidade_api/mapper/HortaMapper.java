@@ -18,7 +18,7 @@ import java.util.List;
 public interface HortaMapper {
 
     @Mapping(source = "usuario.nome", target = "nomeUsuario")
-    @Mapping(source = "unidadeDeEnsino.nome", target = "nomeUnidadeEnsino")
+    @Mapping(source = "unidadeEnsino.nome", target = "nomeUnidadeEnsino")
     @Mapping(source = "areaClassificacao.nome", target = "nomeAreaClassificacao")
     @Mapping(source = "atividadesProdutivas.nome", target = "nomeAtividadesProdutivas")
     @Mapping(source = "tipoDeHorta.nome", target = "nomeTipoDeHorta")
@@ -33,7 +33,7 @@ public interface HortaMapper {
     @Mapping(target = "dataCriacao", ignore = true)
     @Mapping(target = "dataAtualizacao", ignore = true)
     @Mapping(target = "usuario", ignore = true)
-    @Mapping(target = "unidadeDeEnsino", ignore = true)
+    @Mapping(target = "unidadeEnsino", ignore = true)
     @Mapping(target = "areaClassificacao", ignore = true)
     @Mapping(target = "atividadesProdutivas", ignore = true)
     @Mapping(target = "tipoDeHorta", ignore = true)
@@ -53,7 +53,7 @@ public interface HortaMapper {
     @Mapping(target = "dataCriacao", ignore = true)
     @Mapping(target = "dataAtualizacao", ignore = true)
     @Mapping(target = "usuario", ignore = true) 
-    @Mapping(target = "unidadeDeEnsino", ignore = true) 
+    @Mapping(target = "unidadeEnsino", ignore = true) 
     @Mapping(target = "areaClassificacao", ignore = true)
     @Mapping(target = "atividadesProdutivas", ignore = true)
     @Mapping(target = "tipoDeHorta", ignore = true)

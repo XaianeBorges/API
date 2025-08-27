@@ -7,12 +7,14 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@Entity
-@Table(name = "horta_validacao")
-@Data
-@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "idHortaValidacao")
+@Entity
+@Table(name = "horta_validacao")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class HortaValidacao {
 
     @Id
