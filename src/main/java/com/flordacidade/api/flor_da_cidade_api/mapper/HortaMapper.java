@@ -23,7 +23,7 @@ public interface HortaMapper {
     @Mapping(source = "usuario.telefone", target = "telefoneUsuario")
     @Mapping(source = "usuario.dataNascimento", target = "dataNascimentoUsuario")
     @Mapping(source = "usuario.endereco", target = "enderecoUsuario")
-    @Mapping(source = "usuario.escola", target = "escolaUsuario")
+    @Mapping(source = "usuario.escolaridade", target = "escolaridadeUsuario")
     @Mapping(source = "unidadeEnsino.nome", target = "nomeUnidadeEnsino")
     @Mapping(source = "areaClassificacao.nome", target = "nomeAreaClassificacao")
     @Mapping(source = "atividadesProdutivas.nome", target = "nomeAtividadesProdutivas")
