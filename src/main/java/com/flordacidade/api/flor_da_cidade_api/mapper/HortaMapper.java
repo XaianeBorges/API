@@ -29,6 +29,12 @@ public interface HortaMapper {
     @Mapping(source = "atividadesProdutivas.nome", target = "nomeAtividadesProdutivas")
     @Mapping(source = "tipoDeHorta.nome", target = "nomeTipoDeHorta")
     @Mapping(source = "imagemCaminho", target = "imagemUrl", qualifiedByName = "caminhoParaUrl")
+
+    @Mapping(source = "unidadeEnsino.idUnidadeEnsino", target = "idUnidadeEnsino")
+    @Mapping(source = "areaClassificacao.idAreaClassificacao", target = "idAreaClassificacao")
+    @Mapping(source = "atividadesProdutivas.idAtividadesProdutivas", target = "idAtividadesProdutivas")
+    @Mapping(source = "tipoDeHorta.idTipoDeHorta", target = "idTipoDeHorta")
+    @Mapping(source = "usuario.idUsuario", target = "idUsuario")
     HortaResponseDTO toResponseDTO(Horta horta);
 
     List<HortaResponseDTO> toResponseDTOList(List<Horta> hortas);
@@ -68,9 +74,8 @@ public interface HortaMapper {
     @Named("caminhoParaUrl")
     default String caminhoParaUrl(String caminho) {
         if (caminho == null || caminho.isBlank() || "folhin.png".equals(caminho)) {
-
-            return "/api/arquivos/hortas/folhin.png";
+            return "/uploads/imagem/folhin.png";
         }
-        return "/api/arquivos/hortas/" + caminho;
+        return "/uploads/imagem/" + caminho;
     }
 }

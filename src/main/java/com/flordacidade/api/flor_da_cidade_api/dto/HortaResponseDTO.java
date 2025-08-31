@@ -33,4 +33,10 @@ public class HortaResponseDTO {
     private String enderecoUsuario;
     private String escolaridadeUsuario;
     private String nomeTipoDeHorta;
+
+    private Integer idUnidadeEnsino;
+    private Integer idAreaClassificacao;
+    private Integer idAtividadesProdutivas;
+    private Integer idTipoDeHorta;
+    private Integer idUsuario;
 }
