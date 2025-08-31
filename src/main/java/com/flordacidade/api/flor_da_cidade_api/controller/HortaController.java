@@ -88,7 +88,7 @@ public class HortaController {
     @GetMapping("/solicitacoes/pendentes")
     @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
     public ResponseEntity<List<HortaComUsuarioDTO>> getPendingHortaRequests() {
-    List<HortaComUsuarioDTO> requests = hortaService.getPendingHortaRequests();
+    List<HortaComUsuarioDTO> requests = hortaService.getPendingHortaRequests();  
     return ResponseEntity.ok(requests);
     }
     

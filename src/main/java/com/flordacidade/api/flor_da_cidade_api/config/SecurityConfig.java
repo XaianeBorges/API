@@ -70,7 +70,7 @@ public class SecurityConfig {
                         // Permissões para fluxos de criação pública
                         .requestMatchers(HttpMethod.POST, "/api/pessoas").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/inscricoes").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/cursos/inscricoes").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/hortas").permitAll()
 
                         // ======================= INÍCIO DA CORREÇÃO =======================

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/hortas/areas-classificacao")
+@RequestMapping("/api/areas-classificacao")
 @RequiredArgsConstructor
 @Tag(name = "Auxiliar: Áreas de Classificação", description = "Endpoints para gerenciar as opções de área de classificação para hortas")
 public class AreaClassificacaoController {
