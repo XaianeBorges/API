@@ -1,6 +1,8 @@
 package com.flordacidade.api.flor_da_cidade_api.dto;
 
 import lombok.Data;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -24,5 +26,11 @@ public class HortaResponseDTO {
     private String nomeAreaClassificacao;
     private String nomeAtividadesProdutivas;
     private String nomeUsuario;
+    private String cpfUsuario;
+    private String emailUsuario;
+    private String telefoneUsuario;
+    private LocalDate dataNascimentoUsuario;
+    private String enderecoUsuario;
+    private String escolaridadeUsuario;
     private String nomeTipoDeHorta;
 }
