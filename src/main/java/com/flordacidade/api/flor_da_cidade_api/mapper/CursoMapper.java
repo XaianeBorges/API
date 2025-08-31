@@ -40,6 +40,6 @@ public interface CursoMapper {
         if (bannerFileName == null || bannerFileName.isBlank()) {
             return null;
         }
-        return "/api/arquivos/banners/" + bannerFileName;
+        return "/uploads/banners/" + bannerFileName;
     }
 }
