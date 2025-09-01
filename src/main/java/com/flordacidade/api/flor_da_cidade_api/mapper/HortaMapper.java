@@ -77,5 +77,5 @@ public interface HortaMapper {
             return "/uploads/imagem/folhin.png";
         }
         return "/uploads/imagem/" + caminho;
-    }
+    } 
 }

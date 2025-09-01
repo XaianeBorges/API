@@ -1,12 +1,16 @@
 package com.flordacidade.api.flor_da_cidade_api.controller;
 
 import com.flordacidade.api.flor_da_cidade_api.model.CursoModel;
+import com.flordacidade.api.flor_da_cidade_api.model.InscricaoCursoModel;
 import com.flordacidade.api.flor_da_cidade_api.service.CursoService;
 import com.flordacidade.api.flor_da_cidade_api.service.ExcelService;
+import com.flordacidade.api.flor_da_cidade_api.service.InscricaoCursoService;
 import com.flordacidade.api.flor_da_cidade_api.dto.CursoRequestDTO;
 import com.flordacidade.api.flor_da_cidade_api.dto.CursoResponseDTO;
 import com.flordacidade.api.flor_da_cidade_api.dto.CursoUpdateDTO;
+import com.flordacidade.api.flor_da_cidade_api.dto.InscricaoResponseDTO;
 import com.flordacidade.api.flor_da_cidade_api.mapper.CursoMapper;
+import com.flordacidade.api.flor_da_cidade_api.mapper.InscricaoCursoMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -48,6 +52,8 @@ public class CursoController {
         private final ExcelService excelExportService;
         private final CursoMapper cursoMapper;
         private final ObjectMapper objectMapper;
+        private final InscricaoCursoService inscricaoCursoService;
+        private final InscricaoCursoMapper inscricaoCursoMapper;
 
         @Operation(summary = "Obtém as opções de enums para formulários de cursos", description = "Retorna uma lista de valores possíveis para os tipos de atividade, públicos-alvo e turnos.")
         @ApiResponse(responseCode = "200", description = "Opções retornadas com sucesso")
@@ -82,6 +88,17 @@ public class CursoController {
                 return cursoService.buscarPorId(id)
                                 .map(curso -> ResponseEntity.ok(cursoMapper.toResponseDTO(curso)))
                                 .orElse(ResponseEntity.notFound().build());
+        }
+
+        @Operation(summary = "Lista todos os inscritos em um curso específico")
+        @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de inscrições retornada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Curso não encontrado")
+        })
+        @GetMapping("/{id}/inscricoes")
+        public ResponseEntity<List<InscricaoResponseDTO>> listarInscritosPorCurso(@PathVariable Integer id) {
+            List<InscricaoCursoModel> inscricoes = inscricaoCursoService.listarPorCursoId(id);
+            return ResponseEntity.ok(inscricaoCursoMapper.toResponseDTOList(inscricoes));
         }
 
         @Operation(summary = "Cria um novo curso ou oficina")

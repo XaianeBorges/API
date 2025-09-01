@@ -42,6 +42,14 @@ public class InscricaoCursoService {
         return inscricaoRepository.findById(id);
     }
 
+    public List<InscricaoCursoModel> listarPorCursoId(Integer cursoId) {
+
+        if (!cursoRepository.existsById(cursoId)) {
+            throw new ResourceNotFoundException("Curso não encontrado com o ID: " + cursoId);
+        }
+        return inscricaoRepository.findByCursoIdWithDetails(cursoId);
+    }
+
     @Transactional
     public InscricaoCursoModel salvarInscricao(InscricaoRequestDTO requestDTO) {
 
