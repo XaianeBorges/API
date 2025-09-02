@@ -66,6 +66,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/tipos-horta/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/unidades-ensino/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/atividades-produtivas/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/areas-classificacao/**").permitAll()
 
                         // Permissões para fluxos de criação pública
                         .requestMatchers(HttpMethod.POST, "/api/pessoas").permitAll()
