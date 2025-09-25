@@ -22,7 +22,7 @@ public class ExcelService {
 
     public ByteArrayInputStream exportarCursosParaExcel(List<CursoResponseDTO> cursos) throws IOException {
         String[] columns = { "Nome", "Tipo", "Descrição", "Local", "Instituição", "Público Alvo", "Data Início",
-                "Data Fim", "Inscrição Início", "Inscrição Fim", "Turno", "Vagas", "Carga Horária", "Ativo" };
+                "Data Fim", "Inscrição Início", "Inscrição Fim", "Turno", "Vagas", "Carga Horária" };
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Cursos");
@@ -51,7 +51,7 @@ public class ExcelService {
                 row.createCell(10).setCellValue(cursoDTO.getTurno().toString());
                 row.createCell(11).setCellValue(cursoDTO.getMaxPessoas());
                 row.createCell(12).setCellValue(cursoDTO.getCargaHoraria());
-                row.createCell(13).setCellValue(cursoDTO.getAtivo() ? "Sim" : "Não");
+                row.createCell(13).setCellValue(cursoDTO.getStatus());
             }
 
             workbook.write(out);
@@ -60,8 +60,7 @@ public class ExcelService {
     }
 
     public ByteArrayInputStream exportarHortasParaExcel(List<HortaResponseDTO> hortas) throws IOException {
-        String[] columns = { "Nome da Horta", "Status", "Endereço", "Responsável", "Unidade de Ensino",
-                "Tamanho (m²)", "Qtd. Pessoas" };
+        String[] columns = { "Nome da Horta", "Status", "Endereço", "Responsável", "Unidade de Ensino", "Qtd. Pessoas" };
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Hortas");
@@ -83,7 +82,6 @@ public class ExcelService {
                 row.createCell(3).setCellValue(hortaDTO.getNomeUsuario() != null ? hortaDTO.getNomeUsuario() : "N/A");
                 row.createCell(4).setCellValue(
                         hortaDTO.getNomeUnidadeEnsino() != null ? hortaDTO.getNomeUnidadeEnsino() : "N/A");
-                row.createCell(5).setCellValue(hortaDTO.getTamanhoAreaProducao());
                 row.createCell(6).setCellValue(hortaDTO.getQntPessoas());
             }
 

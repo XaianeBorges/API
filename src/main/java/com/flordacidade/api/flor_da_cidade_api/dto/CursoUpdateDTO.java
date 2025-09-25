@@ -17,7 +17,7 @@ public class CursoUpdateDTO {
     private LocalDate dataFim;
     private LocalDate dataInscInicio;
     private LocalDate dataInscFim;
-    private Boolean ativo;
+    private String status;
     private Turno turno;
     private Integer maxPessoas;
     private Integer cargaHoraria;

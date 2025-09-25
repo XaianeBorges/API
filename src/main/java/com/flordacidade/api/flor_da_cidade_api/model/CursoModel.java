@@ -56,12 +56,13 @@ public class CursoModel {
     @Column(nullable = false)
     private LocalDate dataInscFim;
 
-    @Column(nullable = false)
-    private Boolean ativo = true;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Turno turno;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
 
     @Column(nullable = false)
     private Integer maxPessoas;
@@ -87,5 +88,9 @@ public class CursoModel {
 
     public enum Turno {
         Manhã, Tarde, Noite
+    }
+
+    public enum Status{
+        ATIVO, INATIVO, ARQUIVADO
     }
 }

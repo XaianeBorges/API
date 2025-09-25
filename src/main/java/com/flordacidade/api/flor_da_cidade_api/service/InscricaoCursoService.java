@@ -61,7 +61,7 @@ public class InscricaoCursoService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Usuário não encontrado com o ID: " + requestDTO.getIdUsuario()));
 
-        if (!curso.getAtivo()) {
+        if (curso.getStatus() != CursoModel.Status.ATIVO) {
             throw new BusinessException("Não é possível se inscrever em um curso inativo.");
         }
 

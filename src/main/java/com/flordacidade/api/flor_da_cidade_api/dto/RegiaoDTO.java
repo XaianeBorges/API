@@ -8,4 +8,7 @@ public class RegiaoDTO {
     private Integer idRegiao;
     @NotBlank(message = "O nome é obrigatório.")
     private String nome;
+
+    @NotBlank(message = "O nome da RPA é obrigatório.")
+    private String nomeRPA;
 }

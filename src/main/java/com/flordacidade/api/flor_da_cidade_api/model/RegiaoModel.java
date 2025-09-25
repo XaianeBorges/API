@@ -20,4 +20,6 @@ public class RegiaoModel {
     @Column(name = "nome", nullable = false, unique = true, length = 500)
     private String nome;
 
+    @Column(name = "nome_rpa", nullable = false, unique = true, length = 255)
+    private String nomeRPA;
 }

@@ -14,7 +14,6 @@ public class HortaResponseDTO {
     private String ocupacaoPrincipal;
     private String endereco;
     private String enderecoAlternativo;
-    private Float tamanhoAreaProducao;
     private String caracteristicaGrupo;
     private Integer qntPessoas;
     private String atividadeDescricao;

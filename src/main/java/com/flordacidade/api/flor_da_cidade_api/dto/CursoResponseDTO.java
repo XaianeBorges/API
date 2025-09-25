@@ -11,14 +11,14 @@ public class CursoResponseDTO {
     private String nome;
     private String descricao;
     private String local;
-    private String fotoBannerUrl; // URL completa e acessível
+    private String fotoBannerUrl; 
     private String instituicao;
     private String publicoAlvo;
     private LocalDate dataInicio;
     private LocalDate dataFim;
     private LocalDate dataInscInicio;
     private LocalDate dataInscFim;
-    private Boolean ativo;
+    private String status;
     private String turno;
     private Integer maxPessoas;
     private LocalDateTime dataCriacao;

@@ -91,6 +91,17 @@ public class HortaController {
     List<HortaComUsuarioDTO> requests = hortaService.getPendingHortaRequests();  
     return ResponseEntity.ok(requests);
     }
+
+    @Operation(summary = "Lista todas as solicitações de hortas com o status de ARQUIVADA (visão administrativa)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de todas as hortas com o status ARQUIVADA", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Horta.class))),
+            @ApiResponse(responseCode = "403", description = "Acesso negado, só tecnicos e ADM tem perimssão", content = @Content) })
+    @GetMapping("/arquivadas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    public ResponseEntity<List<HortaComUsuarioDTO>> getHortasArquivadasRequests() {
+    List<HortaComUsuarioDTO> requests = hortaService.getHortasArquivadasRequests();  
+    return ResponseEntity.ok(requests);
+    }
     
     @Operation(summary = "Lista hortas de acordo com o status selecionado(visão administrativa )")
     @ApiResponses(value = {
@@ -216,23 +227,26 @@ public class HortaController {
     @Operation(summary = "Exporta os dados de uma horta especifica para um arquivo em PDF", description = "Gera e baixa um arquivo .pdf com os dados da horta selecionada.")
     @ApiResponse(responseCode = "200", description = "Arquivo PDF gerado", content = @Content(mediaType = "MediaType.APPLICATION_PDF"))
     @GetMapping("/{id}/pdf")
-    public ResponseEntity<InputStreamResource> gerarRelatorioPdf(@PathVariable Integer id) throws IOException {
+     public ResponseEntity<InputStreamResource> gerarRelatorioPdf(@PathVariable Integer id) {
         Horta horta = hortaService.buscarPorId(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada com ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Horta não encontrada com id: " + id));
 
-        HortaResponseDTO hortaDTO = hortaMapper.toResponseDTO(horta);
+        try {
 
-        ByteArrayInputStream bis = pdfService.gerarPdfHorta(hortaDTO);
+            ByteArrayInputStream bis = pdfService.gerarPdfHorta(horta);
 
-        HttpHeaders headers = new HttpHeaders();
-        String filename = "relatorio_horta_" + hortaDTO.getIdHorta() + ".pdf";
+            HttpHeaders headers = new HttpHeaders();
+            String filename = "relatorio-horta-" + horta.getIdHorta() + ".pdf";
+            headers.add("Content-Disposition", "inline; filename=" + filename);
 
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + filename);
+            return ResponseEntity
+                    .ok()
+                    .headers(headers)
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(new InputStreamResource(bis));
 
-        return ResponseEntity
-                .ok()
-                .headers(headers)
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(new InputStreamResource(bis));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

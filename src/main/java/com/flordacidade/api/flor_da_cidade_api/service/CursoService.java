@@ -37,6 +37,14 @@ public class CursoService {
         return cursoRepository.findById(id);
     }
 
+    public List<CursoModel> listarPorStatus(CursoModel.Status status) {
+        return (List<CursoModel>) cursoRepository.findByStatus(status);
+    }
+
+    public List<CursoModel> listarArquivados() {
+        return cursoRepository.findByStatus(CursoModel.Status.ARQUIVADO);
+    }
+
     @Transactional
     public CursoModel salvar(CursoRequestDTO cursoDTO, MultipartFile bannerFile) {
         CursoModel novoCurso = cursoMapper.requestDtoToEntity(cursoDTO);

@@ -40,9 +40,6 @@ public class Horta {
     @Column(name = "endereco_alternativo")
     private String enderecoAlternativo;
 
-    @Column(name = "tamanho_area_producao", nullable = false)
-    private Float tamanhoAreaProducao;
-
     @Column(name = "caracteristica_grupo")
     private String caracteristicaGrupo;
 
@@ -88,6 +85,6 @@ public class Horta {
 
     // --- ENUM para Status ---
     public enum StatusHorta {
-        ATIVA, PENDENTE, INATIVA, VISITA_AGENDADA
+        ATIVA, PENDENTE, INATIVA, VISITA_AGENDADA, ARQUIVADA
     }
 }

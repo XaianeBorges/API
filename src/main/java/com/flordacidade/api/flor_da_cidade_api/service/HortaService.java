@@ -166,6 +166,12 @@ public class HortaService {
     }
 
     @Transactional(readOnly = true)
+    public List<HortaComUsuarioDTO> getHortasArquivadasRequests() {
+        List<Horta> hortasArquivadas = hortaRepository.findByStatusHortaFetchingDetails(Horta.StatusHorta.ARQUIVADA);
+        return hortaMapper.toHortaComUsuarioDTOList(hortasArquivadas);
+    }
+
+    @Transactional(readOnly = true)
     public List<HortaComUsuarioDTO> getHortasByStatusWithUserDetails(Horta.StatusHorta status) {
         List<Horta> hortas = hortaRepository.findByStatusHortaFetchingDetails(status);
         return hortaMapper.toHortaComUsuarioDTOList(hortas);

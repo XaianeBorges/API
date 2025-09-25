@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.security.access.AccessDeniedException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -38,6 +39,22 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+     // Handler específico para exceções de acesso negado do Spring Security
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(
+            AccessDeniedException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(), // 403
+                "Forbidden",
+                "Acesso negado. Você não tem a permissão necessária para acessar este recurso.",
+                request.getRequestURI());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+    
 
     // Um handler genérico para qualquer outra exceção não tratada
     @ExceptionHandler(Exception.class)

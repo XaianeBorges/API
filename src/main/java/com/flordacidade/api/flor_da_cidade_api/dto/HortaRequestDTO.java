@@ -21,10 +21,6 @@ public class HortaRequestDTO {
 
     private String enderecoAlternativo;
 
-    @NotNull(message = "O tamanho da área de produção é obrigatório.")
-    @Positive(message = "O tamanho da área deve ser um número positivo.")
-    private Float tamanhoAreaProducao;
-
     private String caracteristicaGrupo;
 
     @NotNull(message = "A quantidade de pessoas é obrigatória.")

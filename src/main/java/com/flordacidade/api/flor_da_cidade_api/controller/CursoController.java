@@ -90,6 +90,24 @@ public class CursoController {
                                 .orElse(ResponseEntity.notFound().build());
         }
 
+        @Operation(summary = "Busca cursos por status")
+        @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de cursos filtrada por status retornada com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Status inválido fornecido")})
+        @GetMapping("/status")
+        public ResponseEntity<List<CursoResponseDTO>> listarPorStatus(@RequestParam("status") CursoModel.Status status) {
+            List<CursoModel> cursos = cursoService.listarPorStatus(status);
+            return ResponseEntity.ok(cursoMapper.toResponseDTOList(cursos));
+        }
+
+        @Operation(summary = "Lista todos os cursos arquivados")
+        @ApiResponse(responseCode = "200", description = "Lista de cursos arquivados retornada com sucesso")
+        @GetMapping("/arquivados")
+        public ResponseEntity<List<CursoResponseDTO>> listarArquivados() {
+            List<CursoModel> cursosArquivados = cursoService.listarArquivados();
+            return ResponseEntity.ok(cursoMapper.toResponseDTOList(cursosArquivados));
+        }
+
         @Operation(summary = "Lista todos os inscritos em um curso específico")
         @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de inscrições retornada com sucesso"),
@@ -164,7 +182,7 @@ public class CursoController {
                 List<CursoModel> todosOsCursos = cursoService.listarTodos();
 
                 List<CursoModel> cursosAtivos = todosOsCursos.stream()
-                                .filter(CursoModel::getAtivo)
+                                .filter(curso -> curso.getStatus() == CursoModel.Status.ATIVO)
                                 .collect(Collectors.toList());
 
                 List<CursoResponseDTO> cursosAtivosDTO = cursoMapper.toResponseDTOList(cursosAtivos);
