@@ -25,4 +25,6 @@ public interface UsuarioRepository extends JpaRepository<UsuarioModel, Integer> 
 
     Optional<UsuarioModel> findByEmail(String email);
 
+    Optional<UsuarioModel> findByCpf(String cpf);
+
 }

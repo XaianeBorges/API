@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +56,18 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioResponseDTO> getById(@PathVariable Integer id) {
         return service.getById(id)
+                .map(usuario -> ResponseEntity.ok(mapper.toResponseDTO(usuario)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Busca um usuário pelo seu CPF")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuário encontrado"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado com o CPF fornecido", content = @Content)
+    })
+    @GetMapping("/{cpf}")
+    public ResponseEntity<UsuarioResponseDTO> getByCpf(@Parameter(description = "CPF do usuário a ser buscado") @PathVariable String cpf) {
+        return service.getByCpf(cpf)
                 .map(usuario -> ResponseEntity.ok(mapper.toResponseDTO(usuario)))
                 .orElse(ResponseEntity.notFound().build());
     }

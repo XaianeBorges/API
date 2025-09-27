@@ -36,7 +36,13 @@ public class UsuarioService {
         if (valor == null) {
             return null;
         }
-        return valor.replaceAll("[^0-9]", ""); // Remove tudo que não for um dígito
+        return valor.replaceAll("[^0-9]", ""); 
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<UsuarioModel> getByCpf(String cpf) {
+        String cpfLimpo = limparNumeros(cpf);
+        return usuarioRepository.findByCpf(cpfLimpo);
     }
 
     @Transactional

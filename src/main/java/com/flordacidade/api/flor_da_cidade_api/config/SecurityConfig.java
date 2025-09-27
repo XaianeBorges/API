@@ -67,12 +67,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/unidades-ensino/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/atividades-produtivas/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/areas-classificacao/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/{cpf}").permitAll()
 
                         // Permissões para fluxos de criação pública
                         .requestMatchers(HttpMethod.POST, "/api/pessoas").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/cursos/inscricoes").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/hortas").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/unidades-ensino").permitAll()
 
                         // ======================= INÍCIO DA CORREÇÃO =======================
                         .requestMatchers(HttpMethod.POST, "/api/tecnicos/esqueci-senha").permitAll()
