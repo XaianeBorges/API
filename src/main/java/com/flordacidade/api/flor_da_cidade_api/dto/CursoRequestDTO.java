@@ -51,4 +51,7 @@ public class CursoRequestDTO {
     @NotNull(message = "A carga horária é obrigatória.")
     @PositiveOrZero(message = "A carga horária não pode ser negativa.")
     private Integer cargaHoraria;
+
+    @NotNull(message = "O status do curso é obrigatorio.")
+    private Status status;
 }

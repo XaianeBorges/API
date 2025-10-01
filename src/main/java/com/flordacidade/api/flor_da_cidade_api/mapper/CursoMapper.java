@@ -23,7 +23,6 @@ public interface CursoMapper {
 
     @Mapping(target = "idCurso", ignore = true)
     @Mapping(target = "fotoBanner", ignore = true)
-    @Mapping(target = "status", ignore = true)
     @Mapping(target = "dataCriacao", ignore = true)
     @Mapping(target = "dataAtualizacao", ignore = true)
     CursoModel requestDtoToEntity(CursoRequestDTO requestDTO);
